@@ -3,6 +3,7 @@
 ## Requirements
 
 - [Node.js](https://nodejs.org/en/) (v12)
+- [Git](https://git-scm.com/downloads) (Install Git Bash as well)
 - [Typescript](https://www.typescriptlang.org/) (v3.5.3)
 - [Visual Studio Code](https://code.visualstudio.com/) (to ensure use of typescript-eslint)
 - The following VS Code Extensions:

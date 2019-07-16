@@ -5,7 +5,7 @@
     ".git",
     "node_modules"
   ],
-  "exec": "npm run server",
+  "exec": "npm start",
   "ext": "ts",
   "build": "tsc"
 }
