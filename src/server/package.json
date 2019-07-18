@@ -1,0 +1,44 @@
+{
+  "name": "cs451-project-server",
+  "version": "1.0.0",
+  "description": "Server for a multiplayer checkers web app",
+  "main": "index.ts",
+  "scripts": {
+    "test": "node_modules/.bin/mocha --require ts-node/register \"./test/**/*.test.{ts,tsx}\"",
+    "test-watch": "node_modules/.bin/mocha -w --require ts-node/register --watch-extensions ts,tsx \"./test/**/*.test.{ts,tsx}\"",
+    "dev-server": "nodemon",
+    "start": "ts-node ./app.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josephthomashines/cs451-project.git"
+  },
+  "author": "CS451-001 Group 1",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/josephthomashines/cs451-project/issues"
+  },
+  "homepage": "https://github.com/josephthomashines/cs451-project#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/chai-as-promised": "^7.1.0",
+    "@types/express": "^4.17.0",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^12.6.2",
+    "@typescript-eslint/eslint-plugin": "^1.11.0",
+    "@typescript-eslint/parser": "^1.11.0",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^5.16.0",
+    "eslint-config-google": "^0.13.0",
+    "eslint-plugin-react": "^7.14.2",
+    "mocha": "^6.1.4",
+    "nodemon": "^1.19.1",
+    "ts-node": "^8.3.0",
+    "typescript": "^3.5.3"
+  }
+}
