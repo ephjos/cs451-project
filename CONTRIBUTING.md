@@ -22,23 +22,25 @@ I recommend using [nvm](https://github.com/nvm-sh/nvm) to install node. This all
 
 ### Typescript
 
-Easiest way to get `tsc` on the command line is 
+Easiest way to get `tsc` on the command line is
 ```
-npm i -g typescript
+yarn global add typescript
 ```
 
 ### Project
 
-It is recommended that you use `npm ci` over `npm install` to prevent package-lock hell. For now there are no special instructions.
+It is recommended that you use `yarn install` over `npm install` to prevent `npm` issues.
+
+If you do not have `yarn` currently installed, you can find [it here.](https://yarnpkg.com/lang/en/docs/install/#mac-stable)
 
 ### Run
 
 #### Dev
 
-`cd server && npm run dev-server`
+`cd server && yarn run dev-server`
 
 #### Production
 
-`cd server && npm start`
+`cd server && yarn start`
 
-`cd client && npm run start`
+`cd client && yarn run start`
