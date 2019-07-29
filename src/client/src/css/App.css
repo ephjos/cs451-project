@@ -1,0 +1,25 @@
+.content {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.fill-red {
+  background-color: red;
+}
+
+.fill-white {
+  background-color: white;
+}
+
+.fill-green {
+  background-color: green;
+}
+
+.fill-yellow {
+ background-color: yellow;
+}
