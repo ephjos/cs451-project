@@ -1,13 +1,12 @@
-.content {
+#root {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  width: 70%;
-  padding: 1rem;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
   color: white;
-  background-color: #3a3a3a;
+  background-color: orange;
 }
 
 .fill-red {

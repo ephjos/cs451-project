@@ -4,9 +4,9 @@
 
 .piece {
   position: absolute;
-  top: 10%;
-  left: 15%;
-  border:1px solid black;    
+  top: 13.7%;
+  left: 13.7%;
+  border: 1px inset black;    
   border-radius:50%;
   -moz-border-radius:50%;
   -webkit-border-radius:50%;

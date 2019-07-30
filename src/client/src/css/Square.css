@@ -4,8 +4,6 @@
 
 .square {
   position: relative;
-  display: flex;
-  justify-content: center;
   width: var(--square-width);
   height: var(--square-width);
   padding-bottom: var(--square-width);

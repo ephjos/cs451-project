@@ -1,0 +1,10 @@
+.main-content {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 70%;
+  color: white;
+  background-color: #3a3a3a;
+}

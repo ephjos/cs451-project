@@ -27,13 +27,13 @@ const Board : React.FC<BoardProps> = (props) => {
   const renderPiece = (i: number, x: number, y: number) => {
     const color = getPieceColor(props.positions[i]);
     if(color !== null)
-      return <Piece color={color}/>;
+      return <Piece key={i} color={color}/>;
     return null;
   };
   
   const renderSquare = (i: number) => {
     const [x, y] = indexToCoordinates(i);
-    const color  = (x + y) % 2 === 1 ? 'yellow' : 'green'; 
+    const color  = (x + y) % 2 === 1 ? 'green' : 'yellow'; 
 
     return (
       <Square key={i} color={color}>
