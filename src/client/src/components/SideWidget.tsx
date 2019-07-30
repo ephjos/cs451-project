@@ -1,8 +1,8 @@
 import React from 'react';
 import '../css/Piece.css';
 
-const Piece : React.FC<{color: string}> = (props) => {
-  return <span className={`piece ${props.color}`}/>
+const SideWidget : React.FC = (props) => {
+  return <div className={`side-widget`}>{props.children}</div>;
 }
 
-export default Piece;
+export default SideWidget;

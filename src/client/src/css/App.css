@@ -1,11 +1,13 @@
 .content {
-  min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  width: 70%;
+  padding: 1rem;
   color: white;
+  background-color: #3a3a3a;
 }
 
 .fill-red {
