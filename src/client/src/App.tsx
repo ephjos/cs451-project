@@ -1,25 +1,26 @@
 import React, { Fragment } from 'react';
 import './css/App.css';
-import Board from './components/Board';
 import SideMenu from './components/SideMenu';
 import MainContent from './components/MainContent';
+import Checkers from './components/Checkers';
+import { PieceColor } from './classes/Game';
 
 const App: React.FC = () => {
-  const initialPositions = '-r-r-r-rr-r-r-r----------------------------------w-w-w-ww-w-w-w-'.split('');
 
   return (
     <Fragment>
       <MainContent>
         <h1>CS451 Checkers</h1>
-        <Board positions={initialPositions}/>
+        {/* temp for testing */}
+        <Checkers player={PieceColor.WHITE}/>
       </MainContent>
       <SideMenu 
         topChildren={[
-          <div/>]} 
+          <div key={'1'}/>]} 
         midChildren={[
-          <div/>]} 
+          <div key={'11'}/>]} 
         bottomChildren={[
-          <div/>]}/>
+          <div key={'111'}/>]}/>
     </Fragment>
   );
 }

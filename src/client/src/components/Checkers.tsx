@@ -1,49 +1,60 @@
-import React, { Fragment } from 'react';
-import MainContent from './MainContent';
-import Board from './Board';
-import SideMenu from './SideMenu';
+import React from 'react';
+import BoardView from './BoardView';
+import { PieceColor, Coordinates } from '../classes/Game';
+import Board from '../classes/Board';
 
 interface CheckersProps {
-  playerColor: string,
-  initialPositions: string[];
+  player: PieceColor;
+  history?: string[][];
 }
 
 interface CheckersState {
+  board: Board;
   positions: string[];
+  selected: Coordinates | null;
+  highlighted: [number, number][];
+  history: string[][];
 }
 
 class Checkers extends React.Component<CheckersProps, CheckersState> {
   constructor(props: CheckersProps) {
     super(props);
+
+    const { history } = props;
+    const hasHistory = history && history.length > 0;
+    const positions =  hasHistory ? history![history!.length - 1] : this.getInitialPositions();
+    const board = new Board(positions);
+
     this.state = {
-      positions: props.initialPositions || '-r-r-r-rr-r-r-r----------------------------------w-w-w-ww-w-w-w-'.split(''),
+      board,
+      positions,
+      selected: null,
+      highlighted: [],
+      history: [Array.from(positions)],
     };
   }
 
-  getInitialState() {
+  handleSquareClick = (coords: Coordinates) => {
+    this.setState( { selected: coords });
+  }
+
+  getInitialPositions = () => {
     const intitialPositions = '-r-r-r-rr-r-r-r----------------------------------w-w-w-ww-w-w-w-'.split('');
-    if(this.props.playerColor === 'white') {
+    if(this.props.player === PieceColor.RED) {
       intitialPositions.reverse();
     }
 
     return intitialPositions;
   }
 
-  render() {
+  render= () => {
     return (
-      <Fragment>
-        <MainContent>
-          <h1>CS451 Checkers</h1>
-          <Board positions={this.state.positions}/>
-        </MainContent>
-        <SideMenu 
-          topChildren={[
-            <div/>]} 
-          midChildren={[
-            <div/>]} 
-          bottomChildren={[
-            <div/>]}/>
-      </Fragment>
+      <BoardView
+        board={this.state.board}
+        onSquareClick={this.handleSquareClick}
+        selected={this.state.selected}
+        highlighted={this.state.highlighted}
+        />
     );
   }
 }
