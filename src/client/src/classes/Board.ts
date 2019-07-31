@@ -33,13 +33,13 @@ class Board {
       const squareColor = (x + y) % 2 === 1 ? SquareColor.GREEN : SquareColor.YELLOW;
 
       if(val === 'r') {
-        const piece = new Piece(PieceColor.RED, i);
+        const piece = new Piece(PieceColor.RED, i, null);
         const square = new Square(i, squareColor, piece);
         this._pieces.push(piece);
         this._squares.push(square);
         this._redPieces.push(piece);
       } else if(val === 'w') {
-        const piece = new Piece(PieceColor.WHITE, i);
+        const piece = new Piece(PieceColor.WHITE, i, null);
         const square = new Square(i, squareColor, piece);
         this._pieces.push(piece);
         this._squares.push(square);
@@ -77,14 +77,26 @@ class Board {
     return this._kings;
   }
 
-  private areCoordinatesOccupied(coords: Coordinates) {
+  get capturedReds() : Piece[] {
+    return this._capturedReds;
+  }
+
+  get capturedWhites() : Piece[] {
+    return this._capturedWhites;
+  }
+
+  private areValidCoordinates(coords: Coordinates) : boolean {
+    return !coords.some((val) => val < 0 || val > 7);
+  }
+
+  private areCoordinatesOccupied(coords: Coordinates) : boolean {
     return this._pieces.some((p) => {
       return p.coordinates[0] === coords[0] && 
       p.coordinates[1] === coords[1];
     });
   }
 
-  private areCoordinatesOccupiedByEnemy(color: PieceColor, coords: Coordinates) {
+  private areCoordinatesOccupiedByEnemy(color: PieceColor, coords: Coordinates) : boolean {
     return this._pieces.some((p) => {
       return p.coordinates[0] === coords[0] && 
       p.coordinates[1] === coords[1] &&
@@ -99,7 +111,7 @@ class Board {
     validDiffs.forEach((val, i) => {
       let possible: Coordinates = [val[0] + coordinates[0], val[1] + coordinates[1]];
       // Out of bounds
-      if(possible.some(val => val < 0 || val > 7)) {
+      if(!this.areValidCoordinates(possible)) {
         return;
       }
 
@@ -133,7 +145,7 @@ class Board {
       uncheckedDiffs.forEach((val) => {
         let possible: Coordinates = [val[0] + coordinates[0], val[1] + coordinates[1]];
          // Out of bounds
-        if(possible.some(val => val < 0 || val > 7)) {
+        if(!this.areValidCoordinates(possible)) {
           return;
         }
 
@@ -147,24 +159,77 @@ class Board {
   }
  
   public getValidMoves(piecePosition: Coordinates, hasCaptured: boolean) : Coordinates[] {
-    if (piecePosition.some(val => val < 0 || val > 7)) {
-      throw new Error('Invalid piece index.');
+    if (!this.areValidCoordinates(piecePosition)) {
+      throw new Error('Invalid piece coordinates.');
     }
 
     const index = coordinatesToIndex(piecePosition);
     const piece = this._squares[index].piece;
     if(piece === null) {
-      throw new Error('Tried to get valid moves on a square that has no piece');
+      throw new Error('Tried to get valid moves on a square that has no piece.');
     }
     return this._getValidMoves(piece, hasCaptured);
   }
 
-  get capturedReds() : Piece[] {
-    return this._capturedReds;
+  /**
+   * There is some validation done here that should also have been done on the UI
+   * This double guard exists mostly for debugging purporses since this is a rapid prototype
+   */
+  private _movePieceToPosition(piece: Piece, newPosition: Coordinates) : void {
+    const { coordinates } = piece;
+    const [x1, y1] = coordinates;
+    const [x2, y2] = newPosition;
+    // Simple move, only check if a piece is there
+    if(Math.abs(x1 - x2) === 1) {
+      if(this.areCoordinatesOccupied(newPosition)) {
+        throw new Error('Tried to move to an occupied square');
+      }
+    } else {
+      const direction: Coordinates = [(x1 - x2)/2, (y1 - y2)/2];
+      if(direction.some((x) => Math.abs(x) !== 1)) {
+        throw new Error(`Invalid capture move - move is outside of capture range.`);
+      }
+
+      const captureCoords : Coordinates = [x1 + direction[0], y1 + direction[1]];
+      const captureSquare = this._squares[coordinatesToIndex(captureCoords)];
+      if(captureSquare.piece === null) {
+        throw new Error('Invalid capture move - no piece on sqaure to capture.');
+      }
+      
+      const capturePiece = captureSquare.piece;
+      if(capturePiece.color === piece.color) {
+        throw new Error('Tried to capture own color piece.');
+      }
+
+      switch (piece.color) {
+        case PieceColor.RED: this._capturedWhites.push(capturePiece);
+        break;
+        case PieceColor.WHITE: this._capturedReds.push(capturePiece);
+        break;
+      }
+
+      captureSquare.piece = null;
+    }
+
+    const oldSquare = this._squares[coordinatesToIndex(piece.coordinates)];
+    const newSqaure = this._squares[coordinatesToIndex(newPosition)];
+    oldSquare.piece = null;
+    newSqaure.piece = piece;
+    piece.coordinates = newPosition;
   }
 
-  get capturedWhites() : Piece[] {
-    return this._capturedWhites;
+  public movePieceToPosition(piecePosition: Coordinates, newPosition: Coordinates): void {
+    if(!this.areValidCoordinates(piecePosition) || !this.areValidCoordinates(newPosition)) {
+      throw new Error('Invalid piece coordinates.');
+    }
+
+    const index = coordinatesToIndex(piecePosition);
+    const piece = this._squares[index].piece;
+    if(piece === null) {
+      throw new Error('Tried to move a non-existent piece.');
+    }
+    
+    return this._movePieceToPosition(piece, newPosition);
   }
 }
 

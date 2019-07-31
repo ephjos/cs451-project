@@ -1,4 +1,5 @@
 import { PieceColor, indexToCoordinates, Coordinates } from "./Game";
+import Square from "./Square";
 
 class Piece {
   private _color: PieceColor;
@@ -6,7 +7,7 @@ class Piece {
   private _coordinates: Coordinates;
   private _king: boolean;
 
-  constructor(color: PieceColor, index: number, isKing?:boolean) {
+  constructor(color: PieceColor, index: number, square: Square | null, isKing?:boolean) {
     this._color = color;
     this._index = index;
     this._coordinates = indexToCoordinates(this._index);

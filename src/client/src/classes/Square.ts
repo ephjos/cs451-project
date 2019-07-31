@@ -26,10 +26,6 @@ class Square {
     return this._color;
   }
 
-  set color(color: SquareColor) {
-    this._color = color;
-  }
-
   get coordinates() : Coordinates {
     return this._coordinates;
   }

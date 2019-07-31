@@ -1,6 +1,6 @@
 import React from 'react';
 import BoardView from './BoardView';
-import { PieceColor, Coordinates } from '../classes/Game';
+import { PieceColor, Coordinates, coordinatesToIndex } from '../classes/Game';
 import Board from '../classes/Board';
 
 interface CheckersProps {
@@ -30,12 +30,62 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       positions,
       selected: null,
       highlighted: [],
-      history: [Array.from(positions)],
+      history: [Array.from(positions)], 
     };
   }
 
+  getPlayerPieces = () => {
+    switch (this.props.player) {
+      case PieceColor.RED: return this.state.board.redPieces;
+      case PieceColor.WHITE: return this.state.board.whitePieces;
+    }
+  }
+
+  /**
+   * if selected is null,
+   * if coords are for square on which there is no peice of our color (or empty)
+   * do nothing
+   * else select that piece, get valid moves and highlight them
+   * 
+   * if selected is not null (meaning a piece of our color is selected)
+   * if where we are selecting is highlighted make that move
+   * else do nothing
+   * 
+   * optionally we allow user to unselect his chosen piece by cliking on it
+   * 
+   */
   handleSquareClick = (coords: Coordinates) => {
-    this.setState( { selected: coords });
+    const { board, selected, highlighted } = this.state;
+    if(selected === null) {
+      const isValidSelection = board.squares[coordinatesToIndex(coords)].piece !== null;
+
+      if(!isValidSelection) {
+        return;
+      } else {
+        const validMoves = board.getValidMoves(coords, false);
+        const newHighlighted = ([] as any[]).concat(highlighted, validMoves);
+        this.setState({ selected: coords, highlighted: newHighlighted });
+        return;
+      }
+    } else {
+      if(selected[0] === coords[0] && selected[1] === coords[1]) {
+        //this is optional but is better in when testing
+        this.setState({ selected: null, highlighted: [] });
+        return;
+      }
+      const isValidMove = highlighted.some(([x, y]) => {
+        return x === coords[0] && y === coords[1];
+      });
+
+      if(!isValidMove){
+        return;
+      } else {
+        board.movePieceToPosition(selected, coords);
+        this.setState({selected: null, highlighted: [], board });
+        // At this point then we serialize board and add it to history
+        // Then send move to server and wait for opponent basically
+      }
+    }
   }
 
   getInitialPositions = () => {

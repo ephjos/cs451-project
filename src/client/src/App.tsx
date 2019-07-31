@@ -11,8 +11,8 @@ const App: React.FC = () => {
     <Fragment>
       <MainContent>
         <h1>CS451 Checkers</h1>
-        {/* temp for testing */}
-        <Checkers player={PieceColor.WHITE}/>
+        {/* temp for testing - server would set color normally */}
+        <Checkers player={PieceColor.RED}/>
       </MainContent>
       <SideMenu 
         topChildren={[

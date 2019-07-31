@@ -17,8 +17,8 @@ export function indexToCoordinates(i: number) : Coordinates {
 }
 
 export function coordinatesToIndex(coords: Coordinates) : number {
-  const base = 8 * coords[0];
-  const offset = base + coords[1];
+  const base = 8 * coords[1];
+  const offset = base + coords[0];
   return offset;
 }
 
