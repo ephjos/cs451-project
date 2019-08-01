@@ -5,7 +5,7 @@ import PieceView from './PieceView';
 import Board from '../classes/Board';
 import Square from '../classes/Square';
 import Piece from '../classes/Piece';
-import { Coordinates } from '../classes/Game';
+import { Coordinates, generateV4UUID } from '../classes/Game';
 
 
 export interface BoardProps {
@@ -18,7 +18,7 @@ export interface BoardProps {
 const BoardView : React.FC<BoardProps> = (props) => {
 
   const renderPiece = (piece: Piece) => {
-    return <PieceView key={piece.coordinates.toString()} piece={piece}/>;
+    return <PieceView key={generateV4UUID()} piece={piece}/>;
   };
   
   const renderSquare = (square: Square) => {

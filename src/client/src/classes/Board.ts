@@ -13,9 +13,15 @@ class Board {
   private _capturedWhites : Piece[];
 
   constructor(initialValues: string[]) {
-    if(initialValues.length !== 64) {
-      throw new Error('The board must be provided with 64 initial values.');
+    if(initialValues.length < 64) {
+      throw new Error('The board must be provided with at least 64 initial values.');
     }
+
+    initialValues.forEach((val) => {
+      if(val.length !== 1 && val.length !== 2) {
+        throw new Error('Each initial value must be of length 1 or 2.');
+      }
+    });
 
     this._squares = [];
     this._pieces = [];
@@ -25,35 +31,44 @@ class Board {
     this._capturedReds = [];
     this._capturedWhites = [];
 
-    initialValues.forEach((val, i) => {
-      if(val.length !== 1)
-        throw new Error('Each initial value must be of length 1.');
-
+    const activeValues = initialValues.slice(0, 64);
+    activeValues.forEach((val, i) => {
       const [x, y] = indexToCoordinates(i);
-      const squareColor = (x + y) % 2 === 1 ? SquareColor.GREEN : SquareColor.YELLOW;
-
-      if(val === 'r') {
-        const piece = new Piece(PieceColor.RED, i, null);
-        const square = new Square(i, squareColor, piece);
+      const squareColor = (x + y) % 2 === 1 ? SquareColor.GREEN : SquareColor.YELLOW; 
+      let color: PieceColor | null = null;
+      let piece: Piece | null = null;
+      
+      const square = new Square(i, squareColor);
+      if(val.charAt(0) !== '-') {
+        color = val.charAt(0) === 'r' ? PieceColor.RED : PieceColor.WHITE;
+        const isKing = val.length > 1 && val.charAt(1) === '!';
+        piece = new Piece(color, i, isKing);
+        square.piece = piece;
         this._pieces.push(piece);
-        this._squares.push(square);
-        this._redPieces.push(piece);
-      } else if(val === 'w') {
-        const piece = new Piece(PieceColor.WHITE, i, null);
-        const square = new Square(i, squareColor, piece);
-        this._pieces.push(piece);
-        this._squares.push(square);
-        this._whitePieces.push(piece);
-      } else {
-        const square = new Square(i, squareColor);
-        this._squares.push(square);
+        color === PieceColor.RED ? this._redPieces.push(piece) : this._whitePieces.push(piece);
       }
+
+      this._squares.push(square);
     });
 
-    if(this._pieces.length !== 16 || 
-      this._redPieces.length !== 8 || 
-      this._whitePieces.length !== 8) {
-        throw new Error('Invalid initial values. There must be 8 white and red pieces');
+    if(initialValues.length > 64) {
+      const captures = initialValues.slice(64);
+      captures.forEach((val) => {
+        if(val === 'r*') {
+          const piece = new Piece(PieceColor.RED, null);
+          this._capturedReds.push(piece);
+        } else if(val === 'w*') {
+          const piece = new Piece(PieceColor.WHITE, null);
+          this._capturedReds.push(piece);
+        } else {
+          throw new Error('Invalid serialization format.');
+        }
+      });
+    }
+
+    if(this._capturedReds.length + this._redPieces.length !== 8 || 
+      this._capturedWhites.length + this._whitePieces.length !== 8) {
+        throw new Error('Invalid initial values. There must be 8 white and red pieces.');
     }
   }
   
@@ -91,15 +106,15 @@ class Board {
 
   private areCoordinatesOccupied(coords: Coordinates) : boolean {
     return this._pieces.some((p) => {
-      return p.coordinates[0] === coords[0] && 
-      p.coordinates[1] === coords[1];
+      return p.coordinates![0] === coords[0] && 
+      p.coordinates![1] === coords[1];
     });
   }
 
   private areCoordinatesOccupiedByEnemy(color: PieceColor, coords: Coordinates) : boolean {
     return this._pieces.some((p) => {
-      return p.coordinates[0] === coords[0] && 
-      p.coordinates[1] === coords[1] &&
+      return p.coordinates![0] === coords[0] && 
+      p.coordinates![1] === coords[1] &&
       p.color !== color;
     });
   }
@@ -109,7 +124,7 @@ class Board {
     const uncheckedDiffs : Coordinates[] = [...validDiffs];
     const { coordinates, color } = piece;
     validDiffs.forEach((val, i) => {
-      let possible: Coordinates = [val[0] + coordinates[0], val[1] + coordinates[1]];
+      let possible: Coordinates = [val[0] + coordinates![0], val[1] + coordinates![1]];
       // Out of bounds
       if(!this.areValidCoordinates(possible)) {
         return;
@@ -143,7 +158,7 @@ class Board {
     const { coordinates } = piece; 
     if(!hasCaptured && uncheckedDiffs.length > 0) {
       uncheckedDiffs.forEach((val) => {
-        let possible: Coordinates = [val[0] + coordinates[0], val[1] + coordinates[1]];
+        let possible: Coordinates = [val[0] + coordinates![0], val[1] + coordinates![1]];
          // Out of bounds
         if(!this.areValidCoordinates(possible)) {
           return;
@@ -177,7 +192,7 @@ class Board {
    */
   private _movePieceToPosition(piece: Piece, newPosition: Coordinates) : void {
     const { coordinates } = piece;
-    const [x1, y1] = coordinates;
+    const [x1, y1] = coordinates!;
     const [x2, y2] = newPosition;
     // Simple move, only check if a piece is there
     if(Math.abs(x1 - x2) === 1) {
@@ -211,7 +226,7 @@ class Board {
       captureSquare.piece = null;
     }
 
-    const oldSquare = this._squares[coordinatesToIndex(piece.coordinates)];
+    const oldSquare = this._squares[coordinatesToIndex(coordinates!)];
     const newSqaure = this._squares[coordinatesToIndex(newPosition)];
     oldSquare.piece = null;
     newSqaure.piece = piece;
@@ -230,6 +245,42 @@ class Board {
     }
     
     return this._movePieceToPosition(piece, newPosition);
+  }
+
+  /**
+   * Did not put much thought into it but basically it returns an array
+   * with 64 + x strings where x is the number of captured pieces
+   * red captured pieces are serialized first, then white
+   * we use this as history, and also to send to the server to send to the other client
+   * the constructor was modified to accept this as the only valid serialization
+   */
+  public serializeToArray() : string[] {
+    const serialized = this._squares.map((square) => {
+      const piece = square.piece;
+      if(piece === null) {
+        return '-';
+      }
+      let val = '';
+      switch(piece.color) {
+        case PieceColor.RED: val = 'r';
+        break;
+        case PieceColor.WHITE: val = 'w';
+        break;
+      }
+      if(piece.isKing) {
+        val = val.concat('!');
+      }
+      return val;
+    });
+
+    if(this._capturedReds.length > 0) {
+      serialized.push(...(this._capturedReds.map(() => 'r*')));
+    }
+
+    if(this._capturedWhites.length > 0) {
+      serialized.push(...(this._capturedWhites.map(() => 'w*')));
+    }
+    return serialized;
   }
 }
 

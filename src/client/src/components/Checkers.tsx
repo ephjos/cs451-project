@@ -10,7 +10,6 @@ interface CheckersProps {
 
 interface CheckersState {
   board: Board;
-  positions: string[];
   selected: Coordinates | null;
   highlighted: [number, number][];
   history: string[][];
@@ -27,10 +26,9 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
 
     this.state = {
       board,
-      positions,
       selected: null,
       highlighted: [],
-      history: [Array.from(positions)], 
+      history: [[...positions]], 
     };
   }
 
@@ -54,7 +52,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
    * optionally we allow user to unselect his chosen piece by cliking on it
    * 
    */
-  handleSquareClick = (coords: Coordinates) => {
+  handleSquareClick = async (coords: Coordinates) => {
     const { board, selected, highlighted } = this.state;
     if(selected === null) {
       const isValidSelection = board.squares[coordinatesToIndex(coords)].piece !== null;
@@ -70,6 +68,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     } else {
       if(selected[0] === coords[0] && selected[1] === coords[1]) {
         //this is optional but is better in when testing
+        // we can also just allow this if it has no valid moves
         this.setState({ selected: null, highlighted: [] });
         return;
       }
@@ -81,11 +80,25 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         return;
       } else {
         board.movePieceToPosition(selected, coords);
-        this.setState({selected: null, highlighted: [], board });
-        // At this point then we serialize board and add it to history
-        // Then send move to server and wait for opponent basically
+        const history = [...this.state.history];
+        history.push(board.serializeToArray());
+        this.setState({
+          selected: null, 
+          highlighted: [], 
+          board,
+          history,
+        });
+        /**
+         * At this point we disable the UI and send history to the server
+         * then basically wait till we get a response
+         */
+        await this.sendToServerAndWait();
       }
     }
+  }
+
+  sendToServerAndWait = async () => {
+    return;
   }
 
   getInitialPositions = () => {
