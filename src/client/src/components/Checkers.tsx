@@ -55,8 +55,9 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
   handleSquareClick = async (coords: Coordinates) => {
     const { board, selected, highlighted } = this.state;
     if(selected === null) {
-      const isValidSelection = board.squares[coordinatesToIndex(coords)].piece !== null;
-
+      const piece = board.squares[coordinatesToIndex(coords)].piece;
+      const isValidSelection = piece !== null && piece.color === this.props.player;
+      
       if(!isValidSelection) {
         return;
       } else {

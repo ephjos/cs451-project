@@ -11,16 +11,20 @@
 
 .fill-red {
   background-color: red;
+  color: red !important;
 }
 
 .fill-white {
   background-color: white;
+  color: white !important;
 }
 
 .fill-green {
   background-color: green;
+  color: green !important;
 }
 
 .fill-yellow {
  background-color: yellow;
+ color: yellow !important;
 }

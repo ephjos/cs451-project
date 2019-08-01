@@ -14,4 +14,10 @@
   padding-top: var(--circle-width);
   height: auto;
   z-index: 2;
+  color: purple !important;
+}
+
+.king {
+  border: 3px inset currentColor;
+  /*TODO: set offsets to re-position it to the center*/
 }
