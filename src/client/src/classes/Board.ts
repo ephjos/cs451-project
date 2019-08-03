@@ -189,17 +189,22 @@ class Board {
   /**
    * There is some validation done here that should also have been done on the UI
    * This double guard exists mostly for debugging purporses since this is a rapid prototype
+   * Return true if the move generated a capture since the UI has to know whether to continue 
+   * the player's turn
    */
-  private _movePieceToPosition(piece: Piece, newPosition: Coordinates) : void {
+  private _movePieceToPosition(piece: Piece, newPosition: Coordinates) : boolean {
     const { coordinates } = piece;
     const [x1, y1] = coordinates!;
     const [x2, y2] = newPosition;
+    let captured = false;
     // Simple move, only check if a piece is there
     if(Math.abs(x1 - x2) === 1) {
       if(this.areCoordinatesOccupied(newPosition)) {
         throw new Error('Tried to move to an occupied square');
       }
-    } else {
+    } 
+    // Capture logic
+    else {
       const direction: Coordinates = [(x1 - x2)/2, (y1 - y2)/2];
       if(direction.some((x) => Math.abs(x) !== 1)) {
         throw new Error(`Invalid capture move - move is outside of capture range.`);
@@ -224,6 +229,7 @@ class Board {
       }
 
       captureSquare.piece = null;
+      captured = true;
     }
 
     const oldSquare = this._squares[coordinatesToIndex(coordinates!)];
@@ -231,9 +237,10 @@ class Board {
     oldSquare.piece = null;
     newSqaure.piece = piece;
     piece.coordinates = newPosition;
+    return captured;
   }
 
-  public movePieceToPosition(piecePosition: Coordinates, newPosition: Coordinates): void {
+  public movePieceToPosition(piecePosition: Coordinates, newPosition: Coordinates): boolean {
     if(!this.areValidCoordinates(piecePosition) || !this.areValidCoordinates(newPosition)) {
       throw new Error('Invalid piece coordinates.');
     }
