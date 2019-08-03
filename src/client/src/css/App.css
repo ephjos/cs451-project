@@ -28,3 +28,7 @@
  background-color: yellow;
  color: yellow !important;
 }
+
+.title {
+  text-align: center;
+}

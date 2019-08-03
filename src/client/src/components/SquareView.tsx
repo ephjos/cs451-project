@@ -15,7 +15,7 @@ const SquareView : React.FC<SquareProps> = (props) => {
     onClick={props.clickHandler}
     >
     {props.children}
-    {props.selected && <div className="overlay"/>}
+    {props.selected && <div className="square-overlay"/>}
   </div>
   );
 }

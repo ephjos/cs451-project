@@ -10,9 +10,9 @@ const App: React.FC = () => {
   return (
     <Fragment>
       <MainContent>
-        <h1>CS451 Checkers</h1>
+        <h1 className="title">CS451 Checkers</h1>
         {/* temp for testing - server would set color normally */}
-        <Checkers player={PieceColor.RED}/>
+        <Checkers player={PieceColor.RED} hasFirstTurn={true}/>
       </MainContent>
       <SideMenu 
         topChildren={[

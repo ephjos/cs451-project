@@ -5,6 +5,7 @@ import Board from '../classes/Board';
 
 interface CheckersProps {
   player: PieceColor;
+  hasFirstTurn: boolean;
   history?: string[][];
 }
 
@@ -13,6 +14,8 @@ interface CheckersState {
   selected: Coordinates | null;
   highlighted: [number, number][];
   history: string[][];
+  hasTurn: boolean;
+  hasCaptured: boolean;
 }
 
 class Checkers extends React.Component<CheckersProps, CheckersState> {
@@ -28,7 +31,9 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       board,
       selected: null,
       highlighted: [],
-      history: [[...positions]], 
+      history: [[...positions]],
+      hasTurn: props.hasFirstTurn,
+      hasCaptured: false,
     };
   }
 
@@ -52,7 +57,10 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
    * optionally we allow user to unselect his chosen piece by cliking on it
    * 
    */
-  handleSquareClick = async (coords: Coordinates) => {
+  handleSquareClick = (coords: Coordinates) => {
+    if(!this.state.hasTurn) {
+      return;
+    }
     const { board, selected, highlighted } = this.state;
     if(selected === null) {
       const piece = board.squares[coordinatesToIndex(coords)].piece;
@@ -60,12 +68,12 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       
       if(!isValidSelection) {
         return;
-      } else {
-        const validMoves = board.getValidMoves(coords, false);
-        const newHighlighted = ([] as any[]).concat(highlighted, validMoves);
-        this.setState({ selected: coords, highlighted: newHighlighted });
-        return;
       }
+
+      const validMoves = board.getValidMoves(coords, false);
+      const newHighlighted = ([] as any[]).concat(highlighted, validMoves);
+      this.setState({ selected: coords, highlighted: newHighlighted });
+      return;
     } else {
       if(selected[0] === coords[0] && selected[1] === coords[1]) {
         //this is optional but is better in when testing
@@ -79,22 +87,48 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
 
       if(!isValidMove){
         return;
-      } else {
-        board.movePieceToPosition(selected, coords);
-        const history = [...this.state.history];
-        history.push(board.serializeToArray());
-        this.setState({
-          selected: null, 
-          highlighted: [], 
-          board,
-          history,
-        });
-        /**
-         * At this point we disable the UI and send history to the server
-         * then basically wait till we get a response
-         */
-        await this.sendToServerAndWait();
+      } 
+      const preserveTurn = board.movePieceToPosition(selected, coords);
+      const history = [...this.state.history];
+      history.push(board.serializeToArray());
+
+      if(preserveTurn) {
+        // Here is where we handle if a capture was made
+        // By now the piece should have moved to our selected coords
+        const piece = board.squares[coordinatesToIndex(coords)].piece;
+        const isValidSelection = piece !== null && piece.color === this.props.player;
+        
+        // But if data update goes wrong then we have to indicate
+        if(!isValidSelection) {
+          console.error("Piece was not updated to position after capture!");
+          return;
+        }
+
+        const validMoves = board.getValidMoves(coords, true);
+        if(validMoves.length !== 0) {
+          this.setState({ selected: coords, highlighted: validMoves });
+          return;
+        }
       }
+
+      this.setState({
+        selected: null, 
+        highlighted: [], 
+        board,
+        history,
+        hasTurn: false,
+      });
+      /**
+       * At this point we disable the UI and send history to the server
+       * then basically wait till we get a response
+       */
+      this.sendToServerAndWait()
+        .then((res) => {
+        // Render new data
+      }).catch((err) => {
+        // If error either lost connection or server issue
+        // Game probably has to end here
+      });
     }
   }
 
@@ -104,6 +138,11 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
 
   getInitialPositions = () => {
     const intitialPositions = '-r-r-r-rr-r-r-r----------------------------------w-w-w-ww-w-w-w-'.split('');
+    
+    // Bunch of test situations - this one tests basic captures
+    // Also tests conversion to king piece (which is not implemented rn)
+    // const intitialPositions = '-r-r-r-rr-r-r---w--------w----w-------------r--w---w-w-ww-------'.split('');    
+    
     if(this.props.player === PieceColor.RED) {
       intitialPositions.reverse();
     }
@@ -118,6 +157,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         onSquareClick={this.handleSquareClick}
         selected={this.state.selected}
         highlighted={this.state.highlighted}
+        hasTurn={this.state.hasTurn}
         />
     );
   }

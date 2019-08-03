@@ -13,6 +13,7 @@ export interface BoardProps {
   onSquareClick : (coords: Coordinates) => void;
   selected: [number, number] | null;
   highlighted: [number, number][];
+  hasTurn: boolean;
 }
 
 const BoardView : React.FC<BoardProps> = (props) => {
@@ -46,6 +47,10 @@ const BoardView : React.FC<BoardProps> = (props) => {
   return (
     <div className="board">
       {renderSquares()}
+      {!props.hasTurn && 
+      <div className="board-overlay">
+        <p className="board-overlay-text">Waiting for Opponent...</p>
+      </div>}
     </div>
   );
 }
