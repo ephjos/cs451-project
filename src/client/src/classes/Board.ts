@@ -205,7 +205,7 @@ class Board {
         throw new Error(`Invalid capture move - move is outside of capture range.`);
       }
 
-      const captureCoords : Coordinates = [x1 + direction[0], y1 + direction[1]];
+      const captureCoords : Coordinates = [x1 - direction[0], y1 - direction[1]];
       const captureSquare = this._squares[coordinatesToIndex(captureCoords)];
       if(captureSquare.piece === null) {
         throw new Error('Invalid capture move - no piece on sqaure to capture.');
