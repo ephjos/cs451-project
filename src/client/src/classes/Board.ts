@@ -106,15 +106,17 @@ class Board {
 
   private areCoordinatesOccupied(coords: Coordinates) : boolean {
     return this._pieces.some((p) => {
-      return p.coordinates![0] === coords[0] && 
-      p.coordinates![1] === coords[1];
+      return p.coordinates !== null && 
+      p.coordinates[0] === coords[0] && 
+      p.coordinates[1] === coords[1];
     });
   }
 
   private areCoordinatesOccupiedByEnemy(color: PieceColor, coords: Coordinates) : boolean {
     return this._pieces.some((p) => {
-      return p.coordinates![0] === coords[0] && 
-      p.coordinates![1] === coords[1] &&
+      return p.coordinates !== null && 
+      p.coordinates[0] === coords[0] && 
+      p.coordinates[1] === coords[1] &&
       p.color !== color;
     });
   }
@@ -132,12 +134,15 @@ class Board {
 
       if(this.areCoordinatesOccupiedByEnemy(color, possible)) {
         possible = [possible[0] + val[0], possible[1] + val[1]];
-          if(this.areCoordinatesOccupied(possible)) {
-            return;
-          } else {
-            validCaptures.push(possible);
-            uncheckedDiffs.splice(i, 1);
-          }
+        if(!this.areValidCoordinates(possible)) {
+          return;
+        }
+        if(this.areCoordinatesOccupied(possible)) {
+          return;
+        } else {
+          validCaptures.push(possible);
+          uncheckedDiffs.splice(i, 1);
+        }
       }
     });
 
@@ -228,6 +233,7 @@ class Board {
         break;
       }
 
+      captureSquare.piece.coordinates = null;
       captureSquare.piece = null;
       captured = true;
     }
@@ -237,6 +243,9 @@ class Board {
     oldSquare.piece = null;
     newSqaure.piece = piece;
     piece.coordinates = newPosition;
+    if(newPosition[1] === 0) {
+      piece.setAsKing();
+    }
     return captured;
   }
 
