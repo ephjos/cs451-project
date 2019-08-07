@@ -12,10 +12,11 @@ const db = mongoose.connection
 const app = express();
 const port = process.env.PORT || '8080';
 
-app.set('port', port)
+app.set('port', port);
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(express.static('.'));
+app.use(express.static('public'));
 
 app.use(session({
   resave: true,
@@ -24,7 +25,6 @@ app.use(session({
   cookie: { maxAge: 60000 },
   store: new MongoStore({ mongooseConnection: db })
 }));
-
 
 app.get('/api', function (req, res) {
   res.send('This is an api')
