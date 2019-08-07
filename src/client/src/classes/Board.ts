@@ -133,16 +133,13 @@ class Board {
       }
 
       if(this.areCoordinatesOccupiedByEnemy(color, possible)) {
+        // Check spot to be jumped to
         possible = [possible[0] + val[0], possible[1] + val[1]];
-        if(!this.areValidCoordinates(possible)) {
+        if(!this.areValidCoordinates(possible) || this.areCoordinatesOccupied(possible)) {
           return;
         }
-        if(this.areCoordinatesOccupied(possible)) {
-          return;
-        } else {
-          validCaptures.push(possible);
-          uncheckedDiffs.splice(i, 1);
-        }
+        validCaptures.push(possible);
+        uncheckedDiffs.splice(i, 1);
       }
     });
 
@@ -193,7 +190,7 @@ class Board {
 
   /**
    * There is some validation done here that should also have been done on the UI
-   * This double guard exists mostly for debugging purporses since this is a rapid prototype
+   * This double guard exists mostly for debugging purposes since this is a rapid prototype
    * Return true if the move generated a capture since the UI has to know whether to continue 
    * the player's turn
    */

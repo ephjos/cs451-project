@@ -141,12 +141,26 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
   }
 
   getInitialPositions = () => {
-    const intitialPositions = '-r-r-r-rr-r-r-r----------------------------------w-w-w-ww-w-w-w-'.split('');
+    const intitialPositions = `-r-r-r-r
+                               r-r-r-r-
+                               --------
+                               --------
+                               --------
+                               --------
+                               -w-w-w-w
+                               w-w-w-w-`.replace(/(\n|\t|\s)/g, '').split('');
     
     // Bunch of test situations - this one tests basic captures
     // Also tests conversion to king piece (which is not implemented rn)
-    // const intitialPositions = '-r-r-r-rr-r-r----w------w-----w-------------r--w-w-w-w-w--------'.split('');    
-    
+    // const intitialPositions = `-r-r-r-r
+    //                            r-r-r---
+    //                            -w------
+    //                            w-----w-
+    //                            --------
+    //                            ----r--w
+    //                            -w-w-w-w
+    //                            --------`.replace(/(\n|\t|\s)/g, '').split('');    
+   
     if(this.props.player === PieceColor.RED) {
       intitialPositions.reverse();
     }
