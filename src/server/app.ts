@@ -4,6 +4,7 @@ import * as session from 'express-session';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as mongoose from 'mongoose' ;
 
+
 // const MongoStore = require('connect-mongo')(session);
 
 const app = express();
@@ -29,3 +30,5 @@ app.get('/', function (req, res) {
 app.listen(app.get('port'), (): void => {
   console.log(`Server running on port ${app.get('port')}`);
 });
+
+export default app;
