@@ -4,3 +4,4 @@
 **/.nyc*
 **/.DS_Store
 **/dist
+**/.idea
