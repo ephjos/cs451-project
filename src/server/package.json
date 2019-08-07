@@ -37,6 +37,7 @@
     "eslint": "^5.16.0",
     "eslint-config-google": "^0.13.0",
     "eslint-plugin-react": "^7.14.2",
+    "express-session": "^1.16.2",
     "mocha": "^6.1.4",
     "nodemon": "^1.19.1",
     "ts-node": "^8.3.0",
