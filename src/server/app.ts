@@ -1,42 +1,31 @@
-import * as express from 'express'
-import * as path from 'path'
-//x import * as fs from "fs";
-//x import * as favicon from 'serve-favicon';
-//x import * as logger from 'morgan';
-//x import * as cookieParser from 'cookie-parser';
-import * as bodyParser from 'body-parser'
-import * as session from 'express-session'
+import * as express from 'express';
+import * as bodyParser from 'body-parser';
+import * as session from 'express-session';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as mongoose from 'mongoose' ;
 
-const port = process.env.PORT || '5000'
-const app = express()
+// const MongoStore = require('connect-mongo')(session);
 
-// view engine setup
-//x app.set('views', path.join(__dirname, 'views'));
-//x app.set('view engine', 'jade');
+const app = express();
+const port = process.env.PORT || '8080';
 
-// uncomment after placing your favicon in /public
-// app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-//x app.use(logger('dev'));
-//x app.use(cookieParser());
+app.use(express.static('public'));
 
-app.set('port', port)
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(express.static('.'))
-app.use(
-  session({
-    resave: true,
-    saveUninitialized: true,
-    secret: 'SOMERANDOMSECRETHERE',
-    cookie: { maxAge: 60000 },
-  }),
-)
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(session({
+  resave: true,
+  saveUninitialized: true,
+  secret: 'GameSession',
+  cookie: { maxAge: 60000 }}));
 
-app.listen(
-  app.get('port'),
-  (): void => {
-    console.log(`Server running on port ${app.get('port')}`)
-  },
-)
+app.get('/', function (req, res) {
+  res.send('Server is up')
+})
+
+app.listen(app.get('port'), (): void => {
+  console.log(`Server running on port ${app.get('port')}`);
+});
+
+export default app;
