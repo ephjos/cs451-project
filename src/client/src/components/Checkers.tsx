@@ -160,7 +160,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     //                            ----r--w
     //                            -w-w-w-w
     //                            --------`.replace(/(\n|\t|\s)/g, '').split('');    
-   
+
     if(this.props.player === PieceColor.RED) {
       intitialPositions.reverse();
     }

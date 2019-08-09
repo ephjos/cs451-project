@@ -4,3 +4,6 @@
 **/.nyc*
 **/.DS_Store
 **/dist
+**/public
+**/static
+**/.idea
