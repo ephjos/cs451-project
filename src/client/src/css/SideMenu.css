@@ -1,0 +1,9 @@
+.menu {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 30%;
+  background-color: #4a4a4a;
+}

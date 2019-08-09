@@ -1,25 +1,27 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Fragment } from 'react';
+import './css/App.css';
+import SideMenu from './components/SideMenu';
+import MainContent from './components/MainContent';
+import Checkers from './components/Checkers';
+import { PieceColor } from './classes/Game';
 
 const App: React.FC = () => {
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Fragment>
+      <MainContent>
+        <h1 className="title">CS451 Checkers</h1>
+        {/* temp for testing - server would set color normally */}
+        <Checkers player={PieceColor.RED} hasFirstTurn={true}/>
+      </MainContent>
+      <SideMenu 
+        topChildren={[
+          <div key={'1'}/>]} 
+        midChildren={[
+          <div key={'11'}/>]} 
+        bottomChildren={[
+          <div key={'111'}/>]}/>
+    </Fragment>
   );
 }
 

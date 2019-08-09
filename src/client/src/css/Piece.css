@@ -1,0 +1,23 @@
+:root {
+  --circle-width: 70%;
+}
+
+.piece {
+  position: absolute;
+  top: 13.5%;
+  left: 13.5%;
+  border: 1px inset black;    
+  border-radius:50%;
+  -moz-border-radius:50%;
+  -webkit-border-radius:50%;
+  width: var(--circle-width);
+  padding-top: var(--circle-width);
+  height: auto;
+  z-index: 2;
+  color: purple !important;
+}
+
+.king {
+  border: 3px inset currentColor;
+  /*TODO: set offsets to re-position it to the center*/
+}

@@ -1,0 +1,35 @@
+#root {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  color: white;
+  background-color: #3a3a3a;
+  min-height: 100vh;
+}
+
+.fill-red {
+  background-color: red;
+  color: red !important;
+}
+
+.fill-white {
+  background-color: white;
+  color: white !important;
+}
+
+.fill-green {
+  background-color: green;
+  color: green !important;
+}
+
+.fill-yellow {
+ background-color: yellow;
+ color: yellow !important;
+}
+
+.title {
+  text-align: center;
+}
