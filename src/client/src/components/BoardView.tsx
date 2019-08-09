@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import '../css/Board.css';
 import SquareView from './SquareView';
 import PieceView from './PieceView';
@@ -17,6 +17,24 @@ export interface BoardProps {
 }
 
 const BoardView : React.FC<BoardProps> = (props) => {
+  const renderCaptured = () => {
+    const board = props.board;
+    const capturedReds = board.capturedReds.length;
+    const capturedWhites = board.capturedWhites.length;
+    return (
+      <Fragment>
+        <p>Captured</p>
+        <div className="board-captured-reds">
+          <span className="captured fill-red"></span>
+          <p className="captured-count">{capturedReds}</p>
+        </div>
+        <div className="board-captured-whites">
+          <span className="captured fill-white"></span>
+          <p className="captured-count">{capturedWhites}</p>
+        </div>
+      </Fragment>
+    );
+  }
 
   const renderPiece = (piece: Piece) => {
     return <PieceView key={generateV4UUID()} piece={piece}/>;
@@ -45,13 +63,18 @@ const BoardView : React.FC<BoardProps> = (props) => {
   }
 
   return (
-    <div className="board">
-      {renderSquares()}
-      {!props.hasTurn && 
-      <div className="board-overlay">
-        <p className="board-overlay-text">Waiting for Opponent...</p>
-      </div>}
-    </div>
+    <Fragment>
+      <div className="board">
+        {renderSquares()}
+        {!props.hasTurn && 
+        <div className="board-overlay">
+          <p className="board-overlay-text">Waiting for Opponent...</p>
+        </div>}
+      </div>
+      <div className="board-captured">
+        {renderCaptured()}
+      </div>
+    </Fragment>
   );
 }
 

@@ -2,6 +2,7 @@ import React from 'react';
 import BoardView from './BoardView';
 import { PieceColor, Coordinates, coordinatesToIndex } from '../classes/Game';
 import Board from '../classes/Board';
+import '../css/Board.css';
 
 interface CheckersProps {
   player: PieceColor;
@@ -75,7 +76,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       this.setState({ selected: coords, highlighted: newHighlighted });
       return;
     } else {
-      if(selected[0] === coords[0] && selected[1] === coords[1]) {
+      if(selected[0] === coords[0] && selected[1] === coords[1] && !this.state.hasCaptured) {
         //this is optional but is better in when testing
         // we can also just allow this if it has no valid moves
         this.setState({ selected: null, highlighted: [] });
@@ -87,12 +88,15 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
 
       if(!isValidMove){
         return;
-      } 
+      }
+      const wasKing = board.squares[coordinatesToIndex(selected)].piece!.isKing;
       const preserveTurn = board.movePieceToPosition(selected, coords);
+      const becameKing = !wasKing && board.squares[coordinatesToIndex(coords)].piece!.isKing;
       const history = [...this.state.history];
       history.push(board.serializeToArray());
 
-      if(preserveTurn) {
+      // Once a piece becomes king the turn has to end
+      if(preserveTurn && !becameKing) {
         // Here is where we handle if a capture was made
         // By now the piece should have moved to our selected coords
         const piece = board.squares[coordinatesToIndex(coords)].piece;
@@ -106,7 +110,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
 
         const validMoves = board.getValidMoves(coords, true);
         if(validMoves.length !== 0) {
-          this.setState({ selected: coords, highlighted: validMoves });
+          this.setState({ selected: coords, highlighted: validMoves, hasCaptured: true });
           return;
         }
       }
@@ -137,12 +141,26 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
   }
 
   getInitialPositions = () => {
-    const intitialPositions = '-r-r-r-rr-r-r-r----------------------------------w-w-w-ww-w-w-w-'.split('');
+    const intitialPositions = `-r-r-r-r
+                               r-r-r-r-
+                               --------
+                               --------
+                               --------
+                               --------
+                               -w-w-w-w
+                               w-w-w-w-`.replace(/(\n|\t|\s)/g, '').split('');
     
     // Bunch of test situations - this one tests basic captures
     // Also tests conversion to king piece (which is not implemented rn)
-    // const intitialPositions = '-r-r-r-rr-r-r---w--------w----w-------------r--w---w-w-ww-------'.split('');    
-    
+    // const intitialPositions = `-r-r-r-r
+    //                            r-r-r---
+    //                            -w------
+    //                            w-----w-
+    //                            --------
+    //                            ----r--w
+    //                            -w-w-w-w
+    //                            --------`.replace(/(\n|\t|\s)/g, '').split('');    
+
     if(this.props.player === PieceColor.RED) {
       intitialPositions.reverse();
     }
@@ -152,13 +170,15 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
 
   render= () => {
     return (
-      <BoardView
-        board={this.state.board}
-        onSquareClick={this.handleSquareClick}
-        selected={this.state.selected}
-        highlighted={this.state.highlighted}
-        hasTurn={this.state.hasTurn}
-        />
+      <div className="board-container">
+        <BoardView
+          board={this.state.board}
+          onSquareClick={this.handleSquareClick}
+          selected={this.state.selected}
+          highlighted={this.state.highlighted}
+          hasTurn={this.state.hasTurn}
+          />
+      </div>
     );
   }
 }

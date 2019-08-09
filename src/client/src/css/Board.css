@@ -1,6 +1,14 @@
+.board-container {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding: 2rem;
+  width: 100%;
+}
+
 .board {
   position: relative;
-  margin: 5rem;
   width: 45%;
   height: 45%;
   display: flex;
@@ -9,6 +17,35 @@
   align-items: center;
   justify-content: flex-start;
   /* transform: rotate(180deg); */
+}
+
+.board-captured {
+  position: relative;
+  /* padding-top: 1rem; */
+  color: black;
+  margin-left: 2rem;
+  width: 7%;
+  height: 100%;
+  background-color: darkgray;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.captured {
+  position: absolute;
+  left: 25%;
+  border-radius: 50%;
+  -moz-border-radius:50%;
+  -webkit-border-radius:50%;
+  width: 50%;
+  padding-top: 50%;
+  height: auto;
+}
+
+.captured-count {
+  margin: 3rem 0;
 }
 
 .board-overlay {
