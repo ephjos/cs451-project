@@ -4,21 +4,19 @@ import * as session from 'express-session';
 const MongoStore = require('connect-mongo')(session);
 const TTL = 60000 * 5 // 5 minutes
 
+import MatchMaker from './MatchMaker'
+
 class WebServer {
     private _store: any; // No types for connect-mongoS
     private _url: string;
+    public mm: MatchMaker
 
-    // public mm: MatchMaker
-    // public games: Map<string, GameInstance>
-    // public players: Map<string, string>
     public app: any; // No type for Express
 
     constructor(mongo_url: string, mongo_secret: string, port: string = '8080') {
         this._url = mongo_url;
 
-        // this.mm = new MatchMaker(args)
-        // this.games = new Map()
-        // this.players = new Map();
+        this.mm = new MatchMaker()
         this.app = this._configureApp(mongo_secret, port);
     }
 
@@ -45,9 +43,11 @@ class WebServer {
 
     private _configureEndpoints(app: any) {
         // GET
-        app.get('/connect', function (req: any, res: any) { // TODO: Resolve POST in docs
-            res.send(`You\'ve hit /connect! ID: ${req.session.id}`)
-        });
+        app.get('/connect', function (this: any, req: any, res: any) { // TODO: Resolve POST in docs
+            this.mm.addToQueue(req.session.id, () => {
+                res.send(`Opponent found! Your ID is: ${req.session.id}`)
+            })
+        }.bind(this));
 
         app.get('/status', function (req: any, res: any) {
             res.send(`You\'ve hit /status! ID: ${req.session.id}`)
@@ -78,6 +78,7 @@ class WebServer {
             this.app.listen(this.app.get('port'), (): void => {
                 console.log(`Server running on port ${this.app.get('port')}`);
             });
+
         })
     }
 
