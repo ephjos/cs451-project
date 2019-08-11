@@ -1,4 +1,4 @@
-import { Status, generateV4UUID } from './util'
+import { Status, generateV4UUID } from '../../client/src/classes/Game'
 
 class GameInstance {
     private _instanceID: string

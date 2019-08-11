@@ -1,12 +1,15 @@
 import GameInstance from './GameInstance'
 import Queue from './Queue'
-import { Status } from './util'
+import { Status } from '../../client/src/classes/Game'
+
+type addToQueueCallback = (currentTurn?: boolean) => void
 
 class MatchMaker {
+    // TODO: Remove games once they are over
     private _queue: Queue
     private _games: Map<string, GameInstance>
     private _players: Map<string, string>
-    private _otherCallback: () => void
+    private _otherCallback: addToQueueCallback
 
     constructor() {
         this._queue = new Queue()
@@ -14,7 +17,7 @@ class MatchMaker {
         this._players = new Map();
     }
 
-    private _createGame(callback: () => void) {
+    private _createGame(callback: addToQueueCallback) {
         // Get two players at front of queue
         let p1 = this._queue.dequeue();
         let p2 = this._queue.dequeue();
@@ -31,11 +34,12 @@ class MatchMaker {
         this._games.set(gameID, gameInstance);
 
         // Tell both clients a match has been made
-        callback()
-        this._otherCallback()
+        // TODO: Change to promises
+        callback(false)
+        this._otherCallback(true)
     }
 
-    public addToQueue(playerID: string, callback: () => void) {
+    public addToQueue(playerID: string, callback: addToQueueCallback) {
         this._queue.enqueue(playerID)
 
         if (this._queue.length() == 2) {
@@ -45,20 +49,59 @@ class MatchMaker {
         }
     }
 
-    public getStatus(playerID: string): number {
+    public getStatus(playerID: string): [Status, string] {
         if (this._queue.peek() == playerID) {
-            return Status.QUEUE;
+            return [Status.QUEUE, undefined];
         }
 
         let gameID = this._players.get(playerID);
         if (gameID) {
             let gameInstance = this._games.get(gameID);
-            return gameInstance.status
+            return [gameInstance.status, gameInstance.board]
         }
 
+        return [Status.ERROR, undefined]
+    }
+
+    public updateBoard(playerID: string, board: string): Status {
+        if (this.getStatus(playerID)[0] == Status.GOOD) {
+            let gameInstance = this._games.get(
+                this._players.get(playerID)
+            )
+
+            gameInstance.updateBoard(board)
+            return gameInstance.status
+        }
         return Status.ERROR
     }
-    public endGame(playerID: string) { }
+
+    public forfeit(playerID: string): Status {
+        if (this.getStatus(playerID)[0] == Status.GOOD) {
+            let gameInstance = this._games.get(
+                this._players.get(playerID)
+            )
+
+            gameInstance.status = Status.FORFEIT
+
+            return gameInstance.status
+        } else {
+            return Status.ERROR
+        }
+    }
+
+    public endGame(playerID: string) {
+        if (this.getStatus(playerID)[0] == Status.GOOD) {
+            let gameInstance = this._games.get(
+                this._players.get(playerID)
+            )
+
+            gameInstance.status = Status.END
+
+            return gameInstance.status
+        } else {
+            return Status.ERROR
+        }
+    }
 
 }
 

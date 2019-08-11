@@ -5,6 +5,7 @@ const MongoStore = require('connect-mongo')(session);
 const TTL = 60000 * 5 // 5 minutes
 
 import MatchMaker from './MatchMaker'
+import { Status } from '../../client/src/classes/Game'
 
 class WebServer {
     private _store: any; // No types for connect-mongoS
@@ -43,28 +44,67 @@ class WebServer {
 
     private _configureEndpoints(app: any) {
         // GET
-        app.get('/connect', function (this: any, req: any, res: any) { // TODO: Resolve POST in docs
-            this.mm.addToQueue(req.session.id, () => {
-                res.send(`Opponent found! Your ID is: ${req.session.id}`)
+        app.get('/connect', function (this: any, req: any, res: any) {
+            this.mm.addToQueue(req.session.id, (currentTurn?: boolean) => {
+                res.statusCode = 200
+                res.send({ msg: 'Opponent found!', currentTurn })
             })
         }.bind(this));
 
-        app.get('/status', function (req: any, res: any) {
-            res.send(`You\'ve hit /status! ID: ${req.session.id}`)
-        });
+        app.get('/status', function (this: any, req: any, res: any) {
+            let [status, board] = this.mm.getStatus(req.session.id)
+            if (status != Status.ERROR) {
+                res.statusCode = 200
+                res.send({
+                    status: status,
+                    board: board
+                })
+            } else {
+                res.statusCode = 403
+                res.send({ msg: 'Client is not currently in a game or queue' })
+            }
+        }.bind(this));
 
         // POST
-        app.post('/move', function (req: any, res: any) {
-            res.send(`You\'ve hit /move! ID: ${req.session.id}`)
-        });
+        app.post('/move', function (this: any, req: any, res: any) {
+            if (req.body && req.body.board) {
+                let status = this.mm.updateBoard(req.session.id, req.body.board)
+                if (status != Status.ERROR) {
+                    res.statusCode = 200
+                    res.send({ status })
+                } else {
+                    res.statusCode = 403
+                    res.send({ msg: 'Client is not currently in game' })
+                }
+            } else {
+                res.statusCode = 400
+                res.send({ msg: 'Request body must be of the form { board: \'...\' }' })
+            }
+        }.bind(this));
 
-        app.post('/end', function (req: any, res: any) {
-            res.send(`You\'ve hit /end! ID: ${req.session.id}`)
-        });
+        app.post('/end', function (this: any, req: any, res: any) {
+            let status = this.mm.endGame(req.session.id)
 
-        app.post('/disconnect', function (req: any, res: any) {
-            res.send(`You\'ve hit /disconnect! ID: ${req.session.id}`)
-        });
+            if (status != Status.ERROR) {
+                res.statusCode = 200
+                res.send({ status: status })
+            } else {
+                res.statusCode = 403
+                res.send({ msg: 'Client is not currently in game' })
+            }
+        }.bind(this));
+
+        app.post('/disconnect', function (this: any, req: any, res: any) {
+            let status = this.mm.forfeit(req.session.id)
+
+            if (status != Status.ERROR) {
+                res.statusCode = 200
+                res.send({ status: status })
+            } else {
+                res.statusCode = 403
+                res.send({ msg: 'Client is not currently in game' })
+            }
+        }.bind(this));
 
         return app
     }
@@ -80,11 +120,6 @@ class WebServer {
             });
 
         })
-    }
-
-    // TODO: remove this
-    public printAll() {
-        this._store.all().then((a: any) => console.log(a))
     }
 }
 
