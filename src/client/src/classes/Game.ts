@@ -1,7 +1,7 @@
 export type Coordinates = [number, number];
 
 export enum PieceColor {
-  RED = 'red', 
+  RED = 'red',
   WHITE = 'white',
 }
 
@@ -10,13 +10,13 @@ export enum SquareColor {
   YELLOW = 'yellow',
 }
 
-export function indexToCoordinates(i: number) : Coordinates {
+export function indexToCoordinates(i: number): Coordinates {
   const x = i % 8;
   const y = Math.floor(i / 8);
   return [x, y];
 }
 
-export function coordinatesToIndex(coords: Coordinates) : number {
+export function coordinatesToIndex(coords: Coordinates): number {
   const base = 8 * coords[1];
   const offset = base + coords[0];
   return offset;
@@ -30,3 +30,11 @@ export function generateV4UUID() {
   });
 }
 
+export enum Status {
+  GOOD = 0,
+  END = 1,
+  FORFEIT = 2,
+  DISCONNECT = 3,
+  QUEUE = 4,
+  ERROR = 100
+}
