@@ -20,7 +20,16 @@
     "@typescript-eslint/camelcase": "error",
     "@typescript-eslint/class-name-casing": "error",
     "@typescript-eslint/consistent-type-definitions": "error",
-    "@typescript-eslint/explicit-member-accessibility": "error",
+    "@typescript-eslint/explicit-member-accessibility": ["error", {
+      "accessibility": "explicit",
+      "overrides": {
+        "accessors": "no-public",
+        "constructors": "no-public",
+        "methods": "explicit",
+        "properties": "off",
+        "parameterProperties": "explicit"
+      }
+    }],
     "@typescript-eslint/interface-name-prefix": "error",
     "@typescript-eslint/member-delimiter-style": "error",
     "@typescript-eslint/no-angle-bracket-type-assertion": "error",
@@ -28,7 +37,6 @@
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-inferrable-types": "error",
-    "@typescript-eslint/no-magic-numbers": "warn",
     "@typescript-eslint/no-misused-new": "error",
     "@typescript-eslint/no-non-null-assertion": "error",
     "@typescript-eslint/no-object-literal-type-assertion": "error",
@@ -48,6 +56,8 @@
       {
         "MemberExpression": 1
       }
-    ]
+    ],
+    "semi": "off",
+    "@typescript-eslint/semi": ["error"]
   }
 }

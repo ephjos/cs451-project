@@ -1,48 +1,48 @@
-import { Status, generateV4UUID } from '../../client/src/classes/Game'
+import { Status, generateV4UUID } from '../../client/src/classes/Game';
 
 class GameInstance {
-    private _instanceID: string
-    private _p1ID: string
-    private _p2ID: string
-    private _board: string
-    private _status: Status
+  private _instanceID: string;
+  private _p1ID: string;
+  private _p2ID: string;
+  private _board: string;
+  private _status: Status;
 
-    constructor(p1ID: any, p2ID: any) {
-        this._instanceID = generateV4UUID()
-        this._p1ID = p1ID;
-        this._p2ID = p2ID;
-        this._board = undefined
-        this._status = Status.GOOD
-    }
+  constructor(p1ID: string, p2ID: string) {
+    this._instanceID = generateV4UUID();
+    this._p1ID = p1ID;
+    this._p2ID = p2ID;
+    this._board = undefined;
+    this._status = Status.GOOD;
+  }
 
-    public updateBoard(board: any) {
-        this._board = board;
-    }
+  public updateBoard(board: string): void {
+    this._board = board;
+  }
 
-    get instanceID() {
-        return this._instanceID;
-    }
+  get instanceID(): string {
+    return this._instanceID;
+  }
 
-    get p1ID() {
-        return this._p1ID;
-    }
+  get p1ID(): string {
+    return this._p1ID;
+  }
 
-    get p2ID() {
-        return this._p2ID;
-    }
+  get p2ID(): string {
+    return this._p2ID;
+  }
 
-    get board() {
-        return this._board;
-    }
+  get board(): string {
+    return this._board;
+  }
 
-    get status() {
-        return this._status;
-    }
+  get status(): Status {
+    return this._status;
+  }
 
-    set status(status: Status) {
-        this._status = status;
-    }
+  set status(status: Status) {
+    this._status = status;
+  }
 
 }
 
-export default GameInstance
+export default GameInstance;

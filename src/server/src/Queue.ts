@@ -1,27 +1,25 @@
-class Queue {
-    private _array: any[]
+class Queue<T> {
+  private _array: T[];
 
-    constructor() {
-        this._array = []
-    }
+  constructor() {
+    this._array = [];
+  }
 
-    public enqueue(value: any) {
-        this._array = this._array.concat(value)
-    }
+  public enqueue(value: T): void {
+    this._array.push(value);
+  }
 
-    public peek() {
-        return this._array[0]
-    }
+  public peek(): T {
+    return this._array[0];
+  }
 
-    public dequeue() {
-        let front = this.peek()
-        this._array = this._array.slice(1)
-        return front
-    }
+  public dequeue(): T {
+    return this._array.shift();
+  }
 
-    public length() {
-        return this._array.length
-    }
+  public length(): number {
+    return this._array.length;
+  }
 }
 
-export default Queue
+export default Queue;
