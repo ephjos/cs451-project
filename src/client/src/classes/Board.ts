@@ -11,6 +11,7 @@ class Board {
   private _kings: Piece[];
   private _capturedReds: Piece[];
   private _capturedWhites : Piece[];
+  private _validMovesCache : Map<Piece, Coordinates[]>;
 
   constructor(initialValues: string[]) {
     if(initialValues.length < 64) {
@@ -30,6 +31,7 @@ class Board {
     this._kings = [];
     this._capturedReds = [];
     this._capturedWhites = [];
+    this._validMovesCache = new Map<Piece, Coordinates[]>();
 
     const activeValues = initialValues.slice(0, 64);
     activeValues.forEach((val, i) => {
@@ -121,7 +123,7 @@ class Board {
     });
   }
 
-  private findCaptures(piece: Piece, validDiffs: Coordinates[]) : [Coordinates[], Coordinates[]] {
+  private findCaptures(piece: Piece, validDiffs: Coordinates[]) : Coordinates[] {
     const validCaptures : Coordinates[] = [];
     const uncheckedDiffs : Coordinates[] = [...validDiffs];
     const { coordinates, color } = piece;
@@ -143,34 +145,40 @@ class Board {
       }
     });
 
-    return [validCaptures, uncheckedDiffs];
+    return validCaptures;
   }
 
   private _getValidMoves(piece: Piece, hasCaptured: boolean) : Coordinates[] {
+    // We only use the cache if it is not a chained move
+    if(this._validMovesCache.has(piece) && !hasCaptured) {
+      return this._validMovesCache.get(piece) || []; // I blame flow analysis in maps for this one <.<
+    }
+
     const validDiffs: Coordinates[] = [[-1, -1], [1, -1]];
     if (piece.isKing) {
       validDiffs.push([-1, 1], [1, 1]);
     }
+    const validCaptures = this.findCaptures(piece, validDiffs);
+    
+    // If a capture is possible the piece MUST take it - so only show captures
+    if(validCaptures.length > 0 || hasCaptured) {
+      return validCaptures;
+    }
+
+    // Now we look for normie moves
     const validMoves : Coordinates[] = [];
-    const [validCaptures, uncheckedDiffs] = this.findCaptures(piece, validDiffs);
-    if(validCaptures.length > 0) {
-      validMoves.push(...validCaptures);
-    }
-
     const { coordinates } = piece; 
-    if(!hasCaptured && uncheckedDiffs.length > 0) {
-      uncheckedDiffs.forEach((val) => {
-        let possible: Coordinates = [val[0] + coordinates![0], val[1] + coordinates![1]];
-         // Out of bounds
-        if(!this.areValidCoordinates(possible)) {
-          return;
-        }
+    validDiffs.forEach((val) => {
+      let possible: Coordinates = [val[0] + coordinates![0], val[1] + coordinates![1]];
+        // Out of bounds
+      if(!this.areValidCoordinates(possible)) {
+        return;
+      }
 
-        if(!this.areCoordinatesOccupied(possible)) {
-          validMoves.push(possible);
-        }
-      });
-    }
+      if(!this.areCoordinatesOccupied(possible)) {
+        validMoves.push(possible);
+      }
+    });
 
     return validMoves;
   }
@@ -189,8 +197,6 @@ class Board {
   }
 
   /**
-   * There is some validation done here that should also have been done on the UI
-   * This double guard exists mostly for debugging purposes since this is a rapid prototype
    * Return true if the move generated a capture since the UI has to know whether to continue 
    * the player's turn
    */
@@ -243,7 +249,55 @@ class Board {
     if(newPosition[1] === 0) {
       piece.setAsKing();
     }
+
+    // Turn is over; reset the cache
+    if(!captured) {
+      this._validMovesCache.clear();
+    }
     return captured;
+  }
+
+  private async _computeAllValidMoves(pieces: Piece[]): Promise<undefined> {
+    let captureFound = false;
+
+    // First pass - look for captures only
+    pieces.forEach((piece) => {
+      if(piece.coordinates === null) {
+        return;
+      }
+      if(captureFound) {
+        this._validMovesCache.set(piece, this._getValidMoves(piece, true));
+        return;
+      }
+      const captures = this._getValidMoves(piece, true);
+      if(captures.length > 0) {
+        captureFound = true;
+        this._validMovesCache.set(piece, captures);
+      }
+    });
+
+    // Second pass - we found none so we just fill in valid moves
+    if(!captureFound) {
+      pieces.forEach((piece) => {
+        if(piece.coordinates === null) {
+          return;
+        }
+        this._validMovesCache.set(piece, this._getValidMoves(piece, false));
+      });
+    }
+
+    return;
+  }
+
+  public async computeAllValidMoves(color: PieceColor): Promise<undefined> {
+    if(color === PieceColor.RED) {
+      return this._computeAllValidMoves(this._redPieces);
+    }
+    else if(color === PieceColor.WHITE) {
+      return this._computeAllValidMoves(this._whitePieces);
+    }
+
+    return;
   }
 
   public movePieceToPosition(piecePosition: Coordinates, newPosition: Coordinates): boolean {

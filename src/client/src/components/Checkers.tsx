@@ -13,10 +13,11 @@ interface CheckersProps {
 interface CheckersState {
   board: Board;
   selected: Coordinates | null;
-  highlighted: [number, number][];
+  highlighted: Coordinates[];
   history: string[][];
   hasTurn: boolean;
   hasCaptured: boolean;
+  computedMoves: boolean;
 }
 
 class Checkers extends React.Component<CheckersProps, CheckersState> {
@@ -35,7 +36,14 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       history: [[...positions]],
       hasTurn: props.hasFirstTurn,
       hasCaptured: false,
+      computedMoves: false,
     };
+  }
+
+  componentDidMount = () => {
+    this.state.board.computeAllValidMoves(this.props.player).then(() => {
+      this.setState({ computedMoves: true });
+    });
   }
 
   getPlayerPieces = () => {
@@ -62,6 +70,13 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     if(!this.state.hasTurn) {
       return;
     }
+
+    // Should be rare but means board is still computing moves so board has to be unresponsive
+    if(!this.state.computedMoves) {
+      return;
+    }
+  
+
     const { board, selected, highlighted } = this.state;
     if(selected === null) {
       const piece = board.squares[coordinatesToIndex(coords)].piece;
@@ -72,13 +87,11 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       }
 
       const validMoves = board.getValidMoves(coords, false);
-      const newHighlighted = ([] as any[]).concat(highlighted, validMoves);
+      const newHighlighted = ([] as Coordinates[]).concat(highlighted, validMoves);
       this.setState({ selected: coords, highlighted: newHighlighted });
       return;
     } else {
       if(selected[0] === coords[0] && selected[1] === coords[1] && !this.state.hasCaptured) {
-        //this is optional but is better in when testing
-        // we can also just allow this if it has no valid moves
         this.setState({ selected: null, highlighted: [] });
         return;
       }
@@ -151,12 +164,12 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
                                w-w-w-w-`.replace(/(\n|\t|\s)/g, '').split('');
     
     // Bunch of test situations - this one tests basic captures
-    // Also tests conversion to king piece (which is not implemented rn)
+    // Also tests conversion to king piece
     // const intitialPositions = `-r-r-r-r
     //                            r-r-r---
     //                            -w------
-    //                            w-----w-
-    //                            --------
+    //                            ------w-
+    //                            -w------
     //                            ----r--w
     //                            -w-w-w-w
     //                            --------`.replace(/(\n|\t|\s)/g, '').split('');    
@@ -168,7 +181,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     return intitialPositions;
   }
 
-  render= () => {
+  render = () => {
     return (
       <div className="board-container">
         <BoardView
