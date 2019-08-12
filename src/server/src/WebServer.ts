@@ -54,7 +54,7 @@ class WebServer {
 
     app.get('/status', (req: express.Request, res: express.Response): void => {
       let [status, board] = this.mm.getStatus(req.session.id);
-      if (status != Status.ERROR) {
+      if (status !== Status.ERROR) {
         res.statusCode = 200;
         res.send({
           status: status,
@@ -70,7 +70,7 @@ class WebServer {
     app.post('/move', (req: express.Request, res: express.Response): void => {
       if (req.body && req.body.board) {
         let status = this.mm.updateBoard(req.session.id, req.body.board);
-        if (status != Status.ERROR) {
+        if (status !== Status.ERROR) {
           res.statusCode = 200;
           res.send({ status });
         } else {
@@ -86,7 +86,7 @@ class WebServer {
     app.post('/end', (req: express.Request, res: express.Response): void => {
       let status = this.mm.endGame(req.session.id);
 
-      if (status != Status.ERROR) {
+      if (status !== Status.ERROR) {
         res.statusCode = 200;
         res.send({ status: status });
       } else {
@@ -98,7 +98,7 @@ class WebServer {
     app.post('/disconnect', (req: express.Request, res: express.Response): void => {
       let status = this.mm.forfeit(req.session.id);
 
-      if (status != Status.ERROR) {
+      if (status !== Status.ERROR) {
         res.statusCode = 200;
         res.send({ status: status });
       } else {
