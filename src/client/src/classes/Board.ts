@@ -221,7 +221,7 @@ class Board {
       const captureCoords : Coordinates = [x1 - direction[0], y1 - direction[1]];
       const captureSquare = this._squares[coordinatesToIndex(captureCoords)];
       if(captureSquare.piece === null) {
-        throw new Error('Invalid capture move - no piece on sqaure to capture.');
+        throw new Error('Invalid capture move - no piece on square to capture.');
       }
       
       const capturePiece = captureSquare.piece;
@@ -253,6 +253,7 @@ class Board {
     // Turn is over; reset the cache
     if(!captured) {
       this._validMovesCache.clear();
+      return true;
     }
     return captured;
   }
