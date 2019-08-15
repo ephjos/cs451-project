@@ -242,9 +242,9 @@ class Board {
     }
 
     const oldSquare = this._squares[coordinatesToIndex(coordinates!)];
-    const newSqaure = this._squares[coordinatesToIndex(newPosition)];
+    const newSquare = this._squares[coordinatesToIndex(newPosition)];
     oldSquare.piece = null;
-    newSqaure.piece = piece;
+    newSquare.piece = piece;
     piece.coordinates = newPosition;
     if(newPosition[1] === 0) {
       piece.setAsKing();
@@ -253,7 +253,6 @@ class Board {
     // Turn is over; reset the cache
     if(!captured) {
       this._validMovesCache.clear();
-      return true;
     }
     return captured;
   }
@@ -297,7 +296,6 @@ class Board {
     else if(color === PieceColor.WHITE) {
       return this._computeAllValidMoves(this._whitePieces);
     }
-
     return;
   }
 

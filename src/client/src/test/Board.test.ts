@@ -2,6 +2,7 @@ import Board  from '../classes/Board';
 import {Coordinates, coordinatesToIndex, PieceColor} from "../classes/Game";
 import Piece from "../classes/Piece";
 
+
 const capturePositions = `-r-r-r-r
                           r-r-r---
                           -w------
@@ -10,6 +11,24 @@ const capturePositions = `-r-r-r-r
                           ----r--w
                           -w-w-w-w
                           --------`.replace(/(\n|\t|\s)/g, '').split('');
+
+const SingleRedCapturePositions = `-r-r-r-r
+                               r-r-r---
+                               --------
+                               --w---w-
+                               -w------
+                               ----r--w
+                               -w-w---w
+                               ------w-`.replace(/(\n|\t|\s)/g, '').split('');
+
+const SingleWhiteCapturePositions =`---r-r-r
+                                    r-r---r-
+                                    ---w----
+                                    ----r---
+                                    -r------
+                                    --------
+                                    -w---w-w
+                                    w-w-w-w-`.replace(/(\n|\t|\s)/g, '').split('');
 
 const originalPositions = `-r-r-r-r
                            r-r-r-r-
@@ -20,21 +39,39 @@ const originalPositions = `-r-r-r-r
                            -w-w-w-w
                            w-w-w-w-`.replace(/(\n|\t|\s)/g, '').split('');
 
-//TODO Fix the king board and captures
+const kingCapturePositions = `-/r/-/r/-/r/-/r/
+                              r/-/r/-/-/-/-/-/
+                              -/w/-/-/-/-/-/-/
+                              -/-/-/-/-/-/w/-/
+                              -/w/-/-/-/-/-/-/
+                              -/-/-/-/r/-/-/w/
+                              -/w/-/w/-/w/-/w/
+                              -/-/r!/-/-/-/-/-`.replace(/(\n|\t|\s)/g, '').split('/');
 
-// const kingPositions = `-r-r-r-r
-//                        r-r-----
-//                        -w------
-//                        ------w-
-//                        -w------
-//                        ----r--w
-//                        -w--w-w-w
-//                        --r!-----`.replace(/(\n|\t|\s)/g, '').split('');
+const kingMovePositions = `-/r/-/r/-/r/-/r/
+                           r/-/r/-/-/-/-/-/
+                           -/-/-/-/-/-/-/-/
+                           -/-/w/-/-/-/w/-/
+                           -/w/-/-/-/-/-/-/
+                           w/-/-/-/r/-/-/w/
+                           -/-/-/-/-/-/-/w/
+                           -/-/r!/-/w/-/w/-`.replace(/(\n|\t|\s)/g, '').split('/');
 
+
+
+const SingleRedCaptureBoard = new Board(SingleRedCapturePositions.reverse());
+const SingleWhiteCaptureBoard = new Board(SingleWhiteCapturePositions.reverse());
 const captureBoard = new Board(capturePositions.reverse());
 const originalBoard = new Board(originalPositions.reverse());
 const staticBoard = new Board(originalPositions.reverse());
-//const kingBoard = new Board(kingPositions.reverse());
+const kingCaptureBoard = new Board(kingCapturePositions.reverse());
+const kingMoveBoard = new Board(kingMovePositions.reverse());
+
+
+test('serializeToArray', () => {
+    expect(staticBoard.serializeToArray()).toEqual(originalPositions);
+    expect(kingCaptureBoard.serializeToArray()).toEqual(kingCapturePositions);
+});
 
 
 test('getValidMoves', () => {
@@ -63,17 +100,47 @@ test('getValidMoves', () => {
 //TODO incomplete was working on a mock for this
 test('computeAllValidMoves', () => {
     //Checks all valid moves for red piece with captures
-    expect(captureBoard.computeAllValidMoves(PieceColor.RED))
+    expect(captureBoard.computeAllValidMoves(PieceColor.RED));
 
     //Checks all valid moves for White piece with captures
-    expect(captureBoard.computeAllValidMoves(PieceColor.WHITE))
+    expect(captureBoard.computeAllValidMoves(PieceColor.WHITE));
 
     //Checks all valid moves for a board without captures
-    expect(originalBoard.computeAllValidMoves(PieceColor.WHITE))
+    expect(originalBoard.computeAllValidMoves(PieceColor.WHITE));
 
 });
 
-//TODO add king functionality testing
+test('computeAllValidMoves SingleRedCapture', async () => {
+    async function fetchData() {
+        await SingleRedCaptureBoard.computeAllValidMoves(PieceColor.RED);
+        // @ts-ignore
+        return SingleRedCaptureBoard._validMovesCache;
+    }
+    const data = await fetchData();
+    expect(data.values().next().value.toString()).toBe('5,0');
+});
+
+//TODO something weird here it captures backwards?
+test('computeAllValidMoves WhiteRedCapture', async () => {
+    async function fetchData() {
+        await SingleWhiteCaptureBoard.computeAllValidMoves(PieceColor.WHITE);
+        // @ts-ignore
+        return SingleWhiteCaptureBoard._validMovesCache;
+    }
+    const data = await fetchData();
+    expect(data.values().next().value.toString()).toBe('2,3');
+});
+
+//TODO fill out last test
+// test('computeAllValidMoves ', async () => {
+//     async function fetchData() {
+//         await SingleRedCaptureBoard.computeAllValidMoves(PieceColor.RED);
+//         return SingleRedCaptureBoard._validMovesCache;
+//     }
+//     const data = await fetchData();
+//     expect(data.values().next().value.toString()).toBe('5,0');
+// });
+
 test('movePieceToPosition', () => {
 
     //moving red pieces
@@ -112,11 +179,18 @@ test('movePieceToPosition', () => {
     //expect(captureBoard.movePieceToPosition([3,2], [1,0])).toBeTruthy();
 
     //testing a regular move
-    expect(originalBoard.movePieceToPosition([1,6], [0,5])).toBeTruthy();
+    expect(originalBoard.movePieceToPosition([1,6], [0,5])).toBeFalsy();
 
-});
+    //testing a regular king capture
+    expect(kingCaptureBoard.movePieceToPosition([5,0], [7,2])).toBeTruthy();
 
-//TODO add king and captures to test
-test('serializeToArray', () => {
-    expect(staticBoard.serializeToArray()).toEqual(originalPositions)
+    ////testing a mutli king valid moves
+    expect(kingCaptureBoard.getValidMoves([7,2],true)).toEqual([[5,4]]);
+
+    //testing a mutli king capture
+    expect(kingCaptureBoard.movePieceToPosition([7,2], [5,4])).toBeTruthy();
+
+    //testing a regular king move
+    expect(kingMoveBoard.movePieceToPosition([5,0], [6,1])).toBeFalsy();
+
 });
