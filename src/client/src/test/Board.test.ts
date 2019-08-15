@@ -13,22 +13,13 @@ const capturePositions = `-r-r-r-r
                           --------`.replace(/(\n|\t|\s)/g, '').split('');
 
 const SingleRedCapturePositions = `-r-r-r-r
-                               r-r-r---
-                               --------
-                               --w---w-
-                               -w------
-                               ----r--w
-                               -w-w---w
-                               ------w-`.replace(/(\n|\t|\s)/g, '').split('');
-
-const SingleWhiteCapturePositions =`---r-r-r
-                                    r-r---r-
-                                    ---w----
-                                    ----r---
-                                    -r------
-                                    --------
-                                    -w---w-w
-                                    w-w-w-w-`.replace(/(\n|\t|\s)/g, '').split('');
+                                   r-r-r---
+                                   --------
+                                   --w---w-
+                                   -w------
+                                   ----r--w
+                                   -w-w---w
+                                   ------w-`.replace(/(\n|\t|\s)/g, '').split('');
 
 const originalPositions = `-r-r-r-r
                            r-r-r-r-
@@ -57,20 +48,54 @@ const kingMovePositions = `-/r/-/r/-/r/-/r/
                            -/-/-/-/-/-/-/w/
                            -/-/r!/-/w/-/w/-`.replace(/(\n|\t|\s)/g, '').split('/');
 
+const capturedPositions = `-/r/-/r/-/r/-/r/
+                           r/-/r/-/-/-/-/-/
+                           -/-/-/-/-/-/-/-/
+                           -/-/w/-/-/-/w/-/
+                           -/w/-/-/-/-/-/-/
+                           w/-/-/-/r/-/-/w/
+                           -/-/-/-/-/-/-/w/
+                           -/-/r*/-/w*/-/w/-`.replace(/(\n|\t|\s)/g, '').split('/');
 
+const ValueSizeThreeBoard = `-/r/-/r/-/r/-/r/
+                           r/-/r/-/-/-/-/-/
+                           -/-/-/-/-/-/-/-/
+                           -/-/w/-/-/-/w/-/
+                           -/w/-/-/-/-/-/-/
+                           w/-/-/-/r/-/-/w/
+                           -/-/-/-/-/-/-/w/
+                           -/-/r!T/-/w/-/w/-`.replace(/(\n|\t|\s)/g, '').split('/');
 
-const SingleRedCaptureBoard = new Board(SingleRedCapturePositions.reverse());
-const SingleWhiteCaptureBoard = new Board(SingleWhiteCapturePositions.reverse());
+const  boardWithLessThan64Values= `-/r/-/r/-/r/-/r/
+                                   r/-/r/-/-/-/-/-/
+                                   -/-/-/-/-/-/-/-/
+                                   -/-/w/-/-/-/w/-/
+                                   -/w/-/-/-/-/-/-/
+                                   w/-/-/-/r/-/-/w/
+                                   -/-/-/-/-/-/-/w/
+                                   -/-/-/w/-/w/-`.replace(/(\n|\t|\s)/g, '').split('/');
+
 const captureBoard = new Board(capturePositions.reverse());
-const originalBoard = new Board(originalPositions.reverse());
 const staticBoard = new Board(originalPositions.reverse());
-const kingCaptureBoard = new Board(kingCapturePositions.reverse());
+const originalBoard = new Board(originalPositions.reverse());
 const kingMoveBoard = new Board(kingMovePositions.reverse());
-
+const kingCaptureBoard = new Board(kingCapturePositions.reverse());
+const SingleRedCaptureBoard = new Board(SingleRedCapturePositions.reverse());
 
 test('serializeToArray', () => {
-    expect(staticBoard.serializeToArray()).toEqual(originalPositions);
+    expect(staticBoard.serializeToArray()).toEqual(originalPositions.reverse());
     expect(kingCaptureBoard.serializeToArray()).toEqual(kingCapturePositions);
+});
+
+test('Constructor', () => {
+    expect( () => new Board(boardWithLessThan64Values))
+        .toThrowError(new Error('The board must be provided with at least 64 initial values.'));
+    expect(() => new Board(ValueSizeThreeBoard))
+        .toThrowError(new Error('Each initial value must be of length 1 or 2.'));
+    const capturedBoard = new Board(capturedPositions.reverse());
+    // const redData = capturedBoard._capturedReds;
+    // const whiteData = capturedBoard._capturedWhites;
+
 });
 
 
@@ -94,55 +119,23 @@ test('getValidMoves', () => {
     //trying to move a select a square without a piece
     expect(() => originalBoard.getValidMoves([4,4],false))
         .toThrowError(new Error('Tried to get valid moves on a square that has no piece.'))
-
-});
-
-//TODO incomplete was working on a mock for this
-test('computeAllValidMoves', () => {
-    //Checks all valid moves for red piece with captures
-    expect(captureBoard.computeAllValidMoves(PieceColor.RED));
-
-    //Checks all valid moves for White piece with captures
-    expect(captureBoard.computeAllValidMoves(PieceColor.WHITE));
-
-    //Checks all valid moves for a board without captures
-    expect(originalBoard.computeAllValidMoves(PieceColor.WHITE));
-
 });
 
 test('computeAllValidMoves SingleRedCapture', async () => {
-    async function fetchData() {
-        await SingleRedCaptureBoard.computeAllValidMoves(PieceColor.RED);
-        // @ts-ignore
-        return SingleRedCaptureBoard._validMovesCache;
-    }
-    const data = await fetchData();
+    await SingleRedCaptureBoard.computeAllValidMoves(PieceColor.RED);
+    // @ts-ignore
+    const data = SingleRedCaptureBoard._validMovesCache;
     expect(data.values().next().value.toString()).toBe('5,0');
 });
 
-//TODO something weird here it captures backwards?
-test('computeAllValidMoves WhiteRedCapture', async () => {
-    async function fetchData() {
-        await SingleWhiteCaptureBoard.computeAllValidMoves(PieceColor.WHITE);
-        // @ts-ignore
-        return SingleWhiteCaptureBoard._validMovesCache;
-    }
-    const data = await fetchData();
-    expect(data.values().next().value.toString()).toBe('2,3');
+test('computeAllValidMoves Regular moves ', async () => {
+    await originalBoard.computeAllValidMoves(PieceColor.RED);
+    // @ts-ignore
+    const data = originalBoard._validMovesCache;
+    expect(data.values().next().value.toString()).toBe('');
 });
 
-//TODO fill out last test
-// test('computeAllValidMoves ', async () => {
-//     async function fetchData() {
-//         await SingleRedCaptureBoard.computeAllValidMoves(PieceColor.RED);
-//         return SingleRedCaptureBoard._validMovesCache;
-//     }
-//     const data = await fetchData();
-//     expect(data.values().next().value.toString()).toBe('5,0');
-// });
-
 test('movePieceToPosition', () => {
-
     //moving red pieces
     //testing a moving to an occupied square
     expect(() => originalBoard.movePieceToPosition([0,7], [1,6]))
@@ -175,9 +168,6 @@ test('movePieceToPosition', () => {
     //testing a red capture white move
     expect(captureBoard.movePieceToPosition([3,2], [1,0])).toBeTruthy();
 
-    //TODO testing a white capture red move, will test later
-    //expect(captureBoard.movePieceToPosition([3,2], [1,0])).toBeTruthy();
-
     //testing a regular move
     expect(originalBoard.movePieceToPosition([1,6], [0,5])).toBeFalsy();
 
@@ -192,5 +182,4 @@ test('movePieceToPosition', () => {
 
     //testing a regular king move
     expect(kingMoveBoard.movePieceToPosition([5,0], [6,1])).toBeFalsy();
-
 });
