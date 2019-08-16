@@ -56,7 +56,7 @@ class MatchMaker {
     }
 
     public getStatus(playerID: string): [Status, string] {
-        if (this._queue.peek().id === playerID) {
+        if (this._queue.peek() && this._queue.peek().id === playerID) {
             return [Status.QUEUE, undefined];
         }
 
