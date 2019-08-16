@@ -61,7 +61,7 @@ class Board {
           this._capturedReds.push(piece);
         } else if(val === 'w*') {
           const piece = new Piece(PieceColor.WHITE, null);
-          this._capturedReds.push(piece);
+          this._capturedWhites.push(piece);
         } else {
           throw new Error('Invalid serialization format.');
         }
