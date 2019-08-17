@@ -1,6 +1,7 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as session from 'express-session';
+import cors = require('cors');
 import connectMongo = require('connect-mongo');
 const MongoStore = connectMongo(session);
 const TTL = 60000 * 5; // 5 minutes
@@ -29,6 +30,7 @@ class WebServer {
     app.use(express.static('public'));
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
+    app.use(cors({origin: '*'}));
 
     app.use(session({
       resave: true,
@@ -95,7 +97,7 @@ class WebServer {
       }
     });
 
-    app.post('/disconnect', (req: express.Request, res: express.Response): void => {
+    app.get('/disconnect', (req: express.Request, res: express.Response): void => {
       let status = this.mm.forfeit(req.session.id);
 
       if (status !== Status.ERROR) {

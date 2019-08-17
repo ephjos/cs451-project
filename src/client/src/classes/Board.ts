@@ -314,6 +314,16 @@ class Board {
     return this._movePieceToPosition(piece, newPosition);
   }
 
+  public getGameWinner(): PieceColor | null {
+    if(this._capturedReds.length === 8) {
+      return PieceColor.WHITE;
+    } else if (this._capturedWhites.length === 8) {
+      return PieceColor.RED;
+    } else {
+      return null;
+    }
+  }
+
   /**
    * Did not put much thought into it but basically it returns an array
    * with 64 + x strings where x is the number of captured pieces
