@@ -8,4 +8,5 @@
     { "language": "typescriptreact", "autoFix": true }
   ],
   "files.eol": "\n",
+  // "terminal.integrated.shell.windows": "C:\\Program Files\\Git\\bin\\bash.exe"
 }

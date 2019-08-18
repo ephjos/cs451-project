@@ -1,5 +1,4 @@
 export type Coordinates = [number, number];
-export const REQUEST_DOMAIN = process.env.NODE_ENV === "development" ? 'http://localhost:5000' : '';
 
 export enum PieceColor {
   RED = 'red',
@@ -23,7 +22,7 @@ export function coordinatesToIndex(coords: Coordinates): number {
   return offset;
 }
 
-export function generateV4UUID(): string {
+export function generateV4UUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     // eslint-disable-next-line
     var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -38,27 +37,4 @@ export enum Status {
   DISCONNECT = 3,
   QUEUE = 4,
   ERROR = 100
-}
-
-export interface ConnectResponse {
-  msg: string;
-  currentTurn: boolean;
-}
-
-export interface StatusResponse {
-  status: Status;
-  board: string;
-}
-
-export interface MoveResponse {
-  status: Status;
-  newMoves: string[][];
-}
-
-export interface EndResponse {
-  status: Status;
-}
-
-export interface DisconnectResponse {
-  status: Status;
 }
