@@ -1,6 +1,7 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as session from 'express-session';
+import cors = require('cors');
 import connectMongo = require('connect-mongo');
 const MongoStore = connectMongo(session);
 const TTL = 60000 * 5; // 5 minutes
@@ -29,6 +30,7 @@ class WebServer {
     app.use(express.static('public'));
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
+    app.use(cors({origin: '*'}));
 
     app.use(session({
       resave: true,
@@ -46,13 +48,16 @@ class WebServer {
   private _configureEndpoints(app: express.Application): express.Application {
     // GET
     app.get('/connect', (req: express.Request, res: express.Response): void => {
+      console.log(`Received /connect request from Client with ID: ${req.session.id}`);
       this.mm.addToQueue(req.session.id).then((currentTurn?: boolean): void => {
         res.statusCode = 200;
         res.send({ msg: 'Opponent found!', currentTurn });
+        console.log(`Found game for Client with ID: ${req.session.id}`);
       });
     });
 
     app.get('/status', (req: express.Request, res: express.Response): void => {
+      console.log(`Received /status request from Client with ID: ${req.session.id}`);
       let [status, board] = this.mm.getStatus(req.session.id);
       if (status !== Status.ERROR) {
         res.statusCode = 200;
@@ -83,7 +88,7 @@ class WebServer {
       }
     });
 
-    app.post('/end', (req: express.Request, res: express.Response): void => {
+    app.get('/end', (req: express.Request, res: express.Response): void => {
       let status = this.mm.endGame(req.session.id);
 
       if (status !== Status.ERROR) {
@@ -95,7 +100,7 @@ class WebServer {
       }
     });
 
-    app.post('/disconnect', (req: express.Request, res: express.Response): void => {
+    app.get('/disconnect', (req: express.Request, res: express.Response): void => {
       let status = this.mm.forfeit(req.session.id);
 
       if (status !== Status.ERROR) {
