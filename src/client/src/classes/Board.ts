@@ -10,8 +10,8 @@ class Board {
   private _whitePieces: Piece[];
   private _kings: Piece[];
   private _capturedReds: Piece[];
-  private _capturedWhites : Piece[];
-  private _validMovesCache : Map<Piece, Coordinates[]>;
+  private _capturedWhites: Piece[];
+  private _validMovesCache: Map<Piece, Coordinates[]>;
 
   constructor(initialValues: string[]) {
     if(initialValues.length < 64) {

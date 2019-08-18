@@ -11,6 +11,7 @@ interface CheckersProps {
   onEnd: (endMsg: string) => Promise<undefined>;
   onForfeit: (forfeitMsg: string) => Promise<undefined>;
   onMove: (moves: string[][]) => Promise<MoveResponse>;
+  onStatus: () => Promise<Status>;
 }
 
 interface CheckersState {
@@ -22,6 +23,7 @@ interface CheckersState {
   hasTurn: boolean;
   hasCaptured: boolean;
   computedMoves: boolean;
+  heartbeat: NodeJS.Timeout | null;
 }
 
 class Checkers extends React.Component<CheckersProps, CheckersState> {
@@ -35,11 +37,12 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       board,
       selected: null,
       highlighted: [],
-      history: [],
+      history: [[...positions]],
       turnMoves: [],
       hasTurn: props.hasFirstTurn,
       hasCaptured: false,
       computedMoves: false,
+      heartbeat: null,
     };
   }
 
@@ -47,6 +50,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     this.state.board.computeAllValidMoves(this.props.player).then(() => {
       this.setState({ computedMoves: true });
     });
+    this.setState({ heartbeat: setInterval(this.props.onStatus, 10000) });
   };
 
   getPlayerPieces = (): Piece[] => {
@@ -142,6 +146,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
           await this.handleNewMoves(res);
         })
         .catch(() => {
+          clearInterval(this.state.heartbeat!);
           this.props.onForfeit('You lost connection with the server.');
         });
     }
@@ -156,6 +161,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       } else {
         message = `You lost! But don't give up!`;
       }
+      clearInterval(this.state.heartbeat!);
       this.props.onEnd(message);
     }
   };
@@ -164,9 +170,11 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     const { status, newMoves } = res;
     
     if(status === Status.END) {
+      clearInterval(this.state.heartbeat!);
       this.props.onEnd(`You lost! But don't give up!`);
       return;
     } else if (status === Status.DISCONNECT) {
+      clearInterval(this.state.heartbeat!);
       this.props.onEnd('Your opponent disconnected!');
       return;
     }

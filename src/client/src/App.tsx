@@ -4,7 +4,7 @@ import SideMenu from './components/SideMenu';
 import MainContent from './components/MainContent';
 import Checkers from './components/Checkers';
 import { PieceColor, REQUEST_DOMAIN, ConnectResponse,
-  DisconnectResponse, EndResponse, MoveResponse } from './classes/Game';
+  DisconnectResponse, EndResponse, MoveResponse, StatusResponse, Status } from './classes/Game';
 import axios from 'axios';
 import to from 'await-to-js';
 
@@ -51,6 +51,7 @@ class App extends React.Component<{}, AppState> {
         <Checkers 
           player={player!}
           hasFirstTurn={firstTurn}
+          onStatus={this.handleStatus}
           onMove={this.handleMove}
           onEnd={this.handleEnd}
           onForfeit={this.handleForfeit}/>
@@ -92,9 +93,7 @@ class App extends React.Component<{}, AppState> {
   handleForfeit = async (forfeitMsg: string): Promise<undefined> => {
     const [error, response] = await to(axios.get<DisconnectResponse>(`${REQUEST_DOMAIN}/disconnect`));
     console.log(response);
-    if(error !== null) {
-      throw error;
-    }
+    console.error(error);
     window.alert(forfeitMsg);
     this.resetState();
     return;
@@ -109,6 +108,33 @@ class App extends React.Component<{}, AppState> {
       throw error;
     }
     return response!.data;
+  };
+
+  handleStatus = async (): Promise<Status> => {
+    const [error, response] = await to(axios.get<StatusResponse>(`${REQUEST_DOMAIN}/status`));
+    console.log(response);
+    if(error !== null) {
+      throw error;
+    }
+    if(response === undefined) {
+      window.alert('Lost connection to the game.');
+      this.resetState();
+      return Status.ERROR;
+    }
+    const { status } = response.data;
+    if (status === Status.FORFEIT) {
+      window.alert('Your opponent forfeited. You won!');
+      this.resetState();
+    } else if(status === Status.DISCONNECT) {
+      window.alert('Your opponent lost connection to the game.');
+      this.resetState();
+    } else if(status === Status.END) {
+      this.handleEnd(`You lost! But don't give up!`);
+    } else if((status === Status.QUEUE && this.state.inGame) || Status.ERROR) { // This should never happen!!
+      window.alert('There was an unexpected error with your game. Sorry!');
+      this.resetState();
+    }
+    return status; 
   };
   
   render = (): ReactNode => {
