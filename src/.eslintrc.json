@@ -4,25 +4,13 @@
     "browser": true,
     "es6": true
   },
-  "extends": [
-    "plugin:react/recommended",
-    "plugin:@typescript-eslint/recommended"
-  ],
+  "extends": "plugin:@typescript-eslint/recommended",
   "parserOptions": {
-    "project": [
-      "./src/tsconfig.json",
-      "./src/client/tsconfig.json",
-      "./src/server/src/tsconfig.json"
-    ],
-    "ecmaVersion": 2018,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true 
-    }
+    "project": "./src/tsconfig.json",
+    "ecmaVersion": 2018
   },
   "plugins": [
-    "@typescript-eslint/eslint-plugin",
-    "react"
+    "@typescript-eslint/eslint-plugin"
   ],
   "rules": {
     "@typescript-eslint/restrict-plus-operands": "error",
@@ -44,14 +32,14 @@
     }],
     "@typescript-eslint/interface-name-prefix": "error",
     "@typescript-eslint/member-delimiter-style": "error",
-    "@typescript-eslint/no-angle-bracket-type-assertion": "off",
+    "@typescript-eslint/no-angle-bracket-type-assertion": "error",
     "@typescript-eslint/no-array-constructor": "error",
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-inferrable-types": "error",
     "@typescript-eslint/no-misused-new": "error",
-    // "@typescript-eslint/no-non-null-assertion": "error",
-    "@typescript-eslint/no-object-literal-type-assertion": "off",
+    "@typescript-eslint/no-non-null-assertion": "error",
+    "@typescript-eslint/no-object-literal-type-assertion": "error",
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/no-use-before-define": "error",
     "@typescript-eslint/no-var-requires": "error",
@@ -70,12 +58,6 @@
       }
     ],
     "semi": "off",
-    "@typescript-eslint/semi": ["error"],
-    "react/prop-types": 0
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
+    "@typescript-eslint/semi": ["error"]
   }
 }
