@@ -4,10 +4,17 @@
   "description": "Server for a multiplayer checkers web app",
   "main": "index.ts",
   "scripts": {
-    "test": "node_modules/.bin/mocha --require ts-node/register \"./test/**/*.test.{ts,tsx}\"",
+    "test": "jest",
     "test-watch": "node_modules/.bin/mocha -w --require ts-node/register --watch-extensions ts,tsx \"./test/**/*.test.{ts,tsx}\"",
     "dev": "nodemon -x yarn start",
     "start": "ts-node ./index.ts"
+  },
+  "jest": {
+    "verbose": true,
+    "moduleDirectories": [
+      "node_modules",
+      "src"
+    ]
   },
   "repository": {
     "type": "git",
@@ -27,8 +34,6 @@
     "mongoose": "^5.6.8"
   },
   "devDependencies": {
-    "@types/chai": "^4.1.7",
-    "@types/chai-as-promised": "^7.1.0",
     "@types/connect-mongo": "^0.0.43",
     "@types/cors": "^2.8.5",
     "@types/express": "^4.17.0",
@@ -39,14 +44,13 @@
     "@types/node": "^12.6.2",
     "@typescript-eslint/eslint-plugin": "^1.11.0",
     "@typescript-eslint/parser": "^1.11.0",
-    "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
     "eslint": "^5.16.0",
     "eslint-config-google": "^0.13.0",
     "eslint-plugin-react": "^7.14.3",
     "express-session": "^1.16.2",
-    "mocha": "^6.1.4",
+    "jest": "^24.8.0",
     "nodemon": "^1.19.1",
+    "ts-jest": "^24.0.2",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.3"
   }
