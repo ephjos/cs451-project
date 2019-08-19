@@ -8,16 +8,16 @@ export interface SquareProps {
   selected: boolean;
 }
 
-const SquareView: React.FC<SquareProps> = (props) => {
+const SquareView : React.FC<SquareProps> = (props) => {
   return (
-    <div
-      className={`square fill-${props.square.color}`} 
-      onClick={props.clickHandler}
+  <div
+    className={`square fill-${props.square.color}`} 
+    onClick={props.clickHandler}
     >
-      {props.children}
-      {props.selected && <div className="square-overlay"/>}
-    </div>
+    {props.children}
+    {props.selected && <div className="square-overlay"/>}
+  </div>
   );
-};
+}
 
 export default SquareView;

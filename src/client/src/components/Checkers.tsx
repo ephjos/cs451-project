@@ -1,17 +1,13 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import BoardView from './BoardView';
-import { PieceColor, Coordinates, coordinatesToIndex, MoveResponse, EndResponse, DisconnectResponse, Status } from '../classes/Game';
+import { PieceColor, Coordinates, coordinatesToIndex } from '../classes/Game';
 import Board from '../classes/Board';
-import Piece from '../classes/Piece';
 import '../css/Board.css';
 
 interface CheckersProps {
   player: PieceColor;
   hasFirstTurn: boolean;
-  onEnd: (endMsg: string) => Promise<undefined>;
-  onForfeit: (forfeitMsg: string) => Promise<undefined>;
-  onMove: (moves: string[][]) => Promise<MoveResponse>;
-  onStatus: () => Promise<Status>;
+  history?: string[][];
 }
 
 interface CheckersState {
@@ -19,18 +15,18 @@ interface CheckersState {
   selected: Coordinates | null;
   highlighted: Coordinates[];
   history: string[][];
-  turnMoves: string[][];
   hasTurn: boolean;
   hasCaptured: boolean;
   computedMoves: boolean;
-  heartbeat: NodeJS.Timeout | null;
 }
 
 class Checkers extends React.Component<CheckersProps, CheckersState> {
   constructor(props: CheckersProps) {
     super(props);
 
-    const positions = this.getInitialPositions();
+    const { history } = props;
+    const hasHistory = history && history.length > 0;
+    const positions =  hasHistory ? history![history!.length - 1] : this.getInitialPositions();
     const board = new Board(positions);
 
     this.state = {
@@ -38,29 +34,39 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       selected: null,
       highlighted: [],
       history: [[...positions]],
-      turnMoves: [],
       hasTurn: props.hasFirstTurn,
       hasCaptured: false,
       computedMoves: false,
-      heartbeat: null,
     };
   }
 
-  componentDidMount = (): void => {
+  componentDidMount = () => {
     this.state.board.computeAllValidMoves(this.props.player).then(() => {
       this.setState({ computedMoves: true });
     });
-    this.setState({ heartbeat: setInterval(this.props.onStatus, 10000) });
-  };
+  }
 
-  getPlayerPieces = (): Piece[] => {
+  getPlayerPieces = () => {
     switch (this.props.player) {
-    case PieceColor.RED: return this.state.board.redPieces;
-    case PieceColor.WHITE: return this.state.board.whitePieces;
+      case PieceColor.RED: return this.state.board.redPieces;
+      case PieceColor.WHITE: return this.state.board.whitePieces;
     }
-  };
+  }
 
-  handleSquareClick = (coords: Coordinates): void => {
+  /**
+   * if selected is null,
+   * if coords are for square on which there is no peice of our color (or empty)
+   * do nothing
+   * else select that piece, get valid moves and highlight them
+   * 
+   * if selected is not null (meaning a piece of our color is selected)
+   * if where we are selecting is highlighted make that move
+   * else do nothing
+   * 
+   * optionally we allow user to unselect his chosen piece by cliking on it
+   * 
+   */
+  handleSquareClick = (coords: Coordinates) => {
     if(!this.state.hasTurn) {
       return;
     }
@@ -69,6 +75,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     if(!this.state.computedMoves) {
       return;
     }
+  
 
     const { board, selected, highlighted } = this.state;
     if(selected === null) {
@@ -98,8 +105,8 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       const wasKing = board.squares[coordinatesToIndex(selected)].piece!.isKing;
       const preserveTurn = board.movePieceToPosition(selected, coords);
       const becameKing = !wasKing && board.squares[coordinatesToIndex(coords)].piece!.isKing;
-      const turnMoves = [...this.state.turnMoves];
-      turnMoves.push(board.serializeToArray());
+      const history = [...this.state.history];
+      history.push(board.serializeToArray());
 
       // Once a piece becomes king the turn has to end
       if(preserveTurn && !becameKing) {
@@ -116,17 +123,10 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
 
         const validMoves = board.getValidMoves(coords, true);
         if(validMoves.length !== 0) {
-          this.setState({ selected: coords,
-            highlighted: validMoves,
-            hasCaptured: true,
-            turnMoves,
-          });
+          this.setState({ selected: coords, highlighted: validMoves, hasCaptured: true });
           return;
         }
       }
-
-      const history = [...this.state.history];
-      history.push(...turnMoves);
 
       this.setState({
         selected: null, 
@@ -134,76 +134,26 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         board,
         history,
         hasTurn: false,
-        computedMoves: false,
       });
       /**
        * At this point we disable the UI and send history to the server
        * then basically wait till we get a response
        */
-      // Do not forget to precompute moves again upon receiving moves
-      this.props.onMove(turnMoves)
-        .then(async (res) => {
-          await this.handleNewMoves(res);
-        })
-        .catch(() => {
-          clearInterval(this.state.heartbeat!);
-          this.props.onForfeit('You lost connection with the server.');
-        });
-    }
-  };
-
-  checkAndHandleWinner = (): void => {
-    const winner = this.state.board.getGameWinner();
-    let message;
-    if(winner) {
-      if(winner === this.props.player) {
-        message = 'Congratulations! You won!';
-      } else {
-        message = `You lost! But don't give up!`;
-      }
-      clearInterval(this.state.heartbeat!);
-      this.props.onEnd(message);
-    }
-  };
-
-  handleNewMoves = async (res: MoveResponse): Promise<undefined> => {
-    const { status, newMoves } = res;
-    
-    if(status === Status.END) {
-      clearInterval(this.state.heartbeat!);
-      this.props.onEnd(`You lost! But don't give up!`);
-      return;
-    } else if (status === Status.DISCONNECT) {
-      clearInterval(this.state.heartbeat!);
-      this.props.onEnd('Your opponent disconnected!');
-      return;
-    }
-    const history = [...this.state.history];
-    history.push(...newMoves);
-    await this.renderReceivedMoves(newMoves);
-    this.checkAndHandleWinner();
-    this.setState({
-      turnMoves: [],
-      history,
-      hasTurn: true,
-    }, () => {
-      this.state.board.computeAllValidMoves(this.props.player).then(() => {
-        this.setState({ computedMoves: true });
+      this.sendToServerAndWait()
+        .then((res) => {
+        // Render new data
+      }).catch((err) => {
+        // If error either lost connection or server issue
+        // Game probably has to end here
       });
-    });
-    return;
-  };
-
-  renderReceivedMoves = async (moves: string[][]): Promise<undefined> => {
-    for(const move of moves) {
-      setTimeout(() => {
-        this.setState({ board: new Board(move)});
-      }, 1000);
     }
-    return;
-  };
+  }
 
-  getInitialPositions = (): string[] => {
+  sendToServerAndWait = async () => {
+    return;
+  }
+
+  getInitialPositions = () => {
     const intitialPositions = `-r-r-r-r
                                r-r-r-r-
                                --------
@@ -212,14 +162,26 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
                                --------
                                -w-w-w-w
                                w-w-w-w-`.replace(/(\n|\t|\s)/g, '').split('');
+    
+    // Bunch of test situations - this one tests basic captures
+    // Also tests conversion to king piece
+    // const intitialPositions = `-r-r-r-r
+    //                            r-r-r---
+    //                            -w------
+    //                            ------w-
+    //                            -w------
+    //                            ----r--w
+    //                            -w-w-w-w
+    //                            --------`.replace(/(\n|\t|\s)/g, '').split('');    
 
     if(this.props.player === PieceColor.RED) {
       intitialPositions.reverse();
     }
-    return intitialPositions;
-  };
 
-  render = (): ReactNode => {
+    return intitialPositions;
+  }
+
+  render = () => {
     return (
       <div className="board-container">
         <BoardView
@@ -228,10 +190,10 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
           selected={this.state.selected}
           highlighted={this.state.highlighted}
           hasTurn={this.state.hasTurn}
-        />
+          />
       </div>
     );
-  };
+  }
 }
 
 export default Checkers;

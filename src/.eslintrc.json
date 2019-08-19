@@ -1,0 +1,63 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "extends": "plugin:@typescript-eslint/recommended",
+  "parserOptions": {
+    "project": "./src/tsconfig.json",
+    "ecmaVersion": 2018
+  },
+  "plugins": [
+    "@typescript-eslint/eslint-plugin"
+  ],
+  "rules": {
+    "@typescript-eslint/restrict-plus-operands": "error",
+    "@typescript-eslint/adjacent-overload-signatures": "error",
+    "@typescript-eslint/array-type": "error",
+    "@typescript-eslint/ban-types": "error",
+    "@typescript-eslint/camelcase": "error",
+    "@typescript-eslint/class-name-casing": "error",
+    "@typescript-eslint/consistent-type-definitions": "error",
+    "@typescript-eslint/explicit-member-accessibility": ["error", {
+      "accessibility": "explicit",
+      "overrides": {
+        "accessors": "no-public",
+        "constructors": "no-public",
+        "methods": "explicit",
+        "properties": "off",
+        "parameterProperties": "explicit"
+      }
+    }],
+    "@typescript-eslint/interface-name-prefix": "error",
+    "@typescript-eslint/member-delimiter-style": "error",
+    "@typescript-eslint/no-angle-bracket-type-assertion": "error",
+    "@typescript-eslint/no-array-constructor": "error",
+    "@typescript-eslint/no-empty-interface": "warn",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-inferrable-types": "error",
+    "@typescript-eslint/no-misused-new": "error",
+    "@typescript-eslint/no-non-null-assertion": "error",
+    "@typescript-eslint/no-object-literal-type-assertion": "error",
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-use-before-define": "error",
+    "@typescript-eslint/no-var-requires": "error",
+    "@typescript-eslint/type-annotation-spacing": "error",
+    "@typescript-eslint/no-parameter-properties": [
+      "error",
+      {
+        "allows": ["readonly"] 
+      }
+    ],
+    "@typescript-eslint/indent": [
+      "error",
+      2,
+      {
+        "MemberExpression": 1
+      }
+    ],
+    "semi": "off",
+    "@typescript-eslint/semi": ["error"]
+  }
+}

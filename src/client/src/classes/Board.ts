@@ -10,8 +10,8 @@ class Board {
   private _whitePieces: Piece[];
   private _kings: Piece[];
   private _capturedReds: Piece[];
-  private _capturedWhites: Piece[];
-  private _validMovesCache: Map<Piece, Coordinates[]>;
+  private _capturedWhites : Piece[];
+  private _validMovesCache : Map<Piece, Coordinates[]>;
 
   constructor(initialValues: string[]) {
     if(initialValues.length < 64) {
@@ -312,16 +312,6 @@ class Board {
     }
     
     return this._movePieceToPosition(piece, newPosition);
-  }
-
-  public getGameWinner(): PieceColor | null {
-    if(this._capturedReds.length === 8) {
-      return PieceColor.WHITE;
-    } else if (this._capturedWhites.length === 8) {
-      return PieceColor.RED;
-    } else {
-      return null;
-    }
   }
 
   /**
