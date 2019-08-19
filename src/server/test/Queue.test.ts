@@ -1,62 +1,67 @@
-import Queue from '../src/Queue'
+import Queue from '../src/Queue';
 
-test('creates empty queue', () => {
-    let q = new Queue()
+test('creates empty queue', (): void => {
+  let q = new Queue();
 
-    expect(q.peek()).toBeUndefined()
+  expect(q.peek()).toBeUndefined();
+  return;
 });
 
 
-test('properly calculates length', () => {
-    let q = new Queue()
-    let l = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+test('properly calculates length', (): void => {
+  let q = new Queue();
+  let l = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
-    l.forEach((n) => { q.enqueue(n) })
+  l.forEach((n): void => { q.enqueue(n); });
 
-    expect(q.length()).toEqual(l.length)
+  expect(q.length()).toEqual(l.length);
+  return;
 });
 
-test('properly peeks', () => {
-    let q = new Queue()
-    let l = [1, 2, 3]
+test('properly peeks', (): void => {
+  let q = new Queue();
+  let l = [1, 2, 3];
 
-    l.forEach((n) => { q.enqueue(n) })
+  l.forEach((n): void => { q.enqueue(n); });
 
-    expect(q.peek()).toEqual(l[0])
+  expect(q.peek()).toEqual(l[0]);
+  return;
 });
 
-test('properly enqueues and dequeues', () => {
-    let q = new Queue()
-    let l = [1, 2, 3]
+test('properly enqueues and dequeues', (): void => {
+  let q = new Queue();
+  let l = [1, 2, 3];
 
-    l.forEach((n) => { q.enqueue(n) })
+  l.forEach((n): void => { q.enqueue(n); });
 
-    l.forEach((n) => {
-        expect(q.dequeue()).toEqual(n)
-    })
+  l.forEach((n): void => {
+    expect(q.dequeue()).toEqual(n);
+  });
+  return;
 });
 
-test('properly handles different types', () => {
-    let checkQueue = (l: any[]) => {
-        let q = new Queue()
+test('properly handles different types', (): void => {
+  let checkQueue = (l: any[]): void => {
+    let q = new Queue();
 
-        l.forEach((n) => { q.enqueue(n) })
+    l.forEach((n): void => { q.enqueue(n); });
 
-        l.forEach((n) => {
-            expect(q.dequeue()).toEqual(n)
-        })
-    }
+    l.forEach((n): void => {
+      expect(q.dequeue()).toEqual(n);
+    });
+  };
 
-    let num = [1, 2, 3, 4, 5]
-    checkQueue(num)
-    checkQueue([num, num, num, num, num])
+  let num = [1, 2, 3, 4, 5];
+  checkQueue(num);
+  checkQueue([num, num, num, num, num]);
 
-    let str = ["1", "2", "3", "4", "5"]
-    checkQueue(str)
-    checkQueue([str, str, str, str, str])
+  let str = ["1", "2", "3", "4", "5"];
+  checkQueue(str);
+  checkQueue([str, str, str, str, str]);
 
-    let fun = [() => { }, () => { }, () => { }, () => { }, () => { }]
-    checkQueue(fun)
-    checkQueue([fun, fun, fun, fun, fun])
-
+  let f = (): void => { };
+  let fun = [f, f, f, f, f];
+  checkQueue(fun);
+  checkQueue([fun, fun, fun, fun, fun]);
+  return;
 });
