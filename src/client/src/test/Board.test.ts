@@ -112,8 +112,8 @@ test('Constructor', () => {
     const whiteData = capturedBoard._capturedWhites;
     const redPiece = new Piece(PieceColor.RED, null, false);
     const whitePiece = new Piece(PieceColor.WHITE, null, false);
-    expect(redData).toEqual([redPiece])
-    expect(whiteData).toEqual([whitePiece])
+    expect(redData).toEqual([redPiece]);
+    expect(whiteData).toEqual([whitePiece]);
 });
 
 //TODO fix get kings check
@@ -138,7 +138,7 @@ test('Get', () => {
     const piece = new Piece(PieceColor.RED, 62, false);
     const redPiece = new Piece(PieceColor.RED, 62, false);
     const whitePiece = new Piece(PieceColor.WHITE, 37, false);
-    const kings = new Piece(PieceColor.RED, 5, true);
+    const kings = new Piece(PieceColor.RED, 3, true);
     const capturedWhitePiece = new Piece(PieceColor.WHITE, null, false);
     const captureRedPiece = new Piece(PieceColor.RED, null, false);
 
@@ -146,9 +146,9 @@ test('Get', () => {
     expect(piecesData.pop()).toEqual(piece);
     expect(redData.pop()).toEqual(redPiece);
     expect(whiteData.pop()).toEqual(whitePiece);
-    //expect(kingsData).toEqual(kings)
-    expect(capturedRedsDate).toEqual([captureRedPiece])
-    expect(capturedWhitesDate).toEqual([capturedWhitePiece])
+    expect(kingsData).toEqual([kings]);
+    expect(capturedRedsDate).toEqual([captureRedPiece]);
+    expect(capturedWhitesDate).toEqual([capturedWhitePiece]);
 
 
 });

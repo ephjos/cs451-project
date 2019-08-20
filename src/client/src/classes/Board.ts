@@ -47,6 +47,7 @@ class Board {
         piece = new Piece(color, i, isKing);
         square.piece = piece;
         this._pieces.push(piece);
+        if(piece.isKing) this._kings.push(piece);
         color === PieceColor.RED ? this._redPieces.push(piece) : this._whitePieces.push(piece);
       }
 
@@ -61,7 +62,7 @@ class Board {
           this._capturedReds.push(piece);
         } else if(val === 'w*') {
           const piece = new Piece(PieceColor.WHITE, null);
-          this._capturedReds.push(piece);
+          this._capturedWhites.push(piece);
         } else {
           throw new Error('Invalid serialization format.');
         }
