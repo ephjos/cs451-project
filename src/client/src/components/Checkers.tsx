@@ -47,9 +47,14 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
   }
 
   componentDidMount = (): void => {
-    this.state.board.computeAllValidMoves(this.props.player).then(() => {
-      this.setState({ computedMoves: true });
-    });
+    if(this.state.hasTurn) {
+      this.state.board.computeAllValidMoves(this.props.player).then(() => {
+        this.setState({ computedMoves: true });
+      });
+    } else {
+      // wait for moves... but how?
+    }
+    
     this.setState({ heartbeat: setInterval(this.props.onStatus, 10000) });
   };
 

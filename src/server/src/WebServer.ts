@@ -73,8 +73,8 @@ class WebServer {
 
     // POST
     app.post('/move', (req: express.Request, res: express.Response): void => {
-      if (req.body && req.body.board) {
-        let status = this.mm.updateBoard(req.session.id, req.body.board);
+      if (req.body && req.body.moves) {
+        let status = this.mm.updateMoves(req.session.id, req.body.moves);
         if (status !== Status.ERROR) {
           res.statusCode = 200;
           res.send({ status });
@@ -84,7 +84,7 @@ class WebServer {
         }
       } else {
         res.statusCode = 400;
-        res.send({ msg: 'Request body must be of the form { board: \'...\' }' });
+        res.send({ msg: 'Request body must be of the form { moves: \'...\' }' });
       }
     });
 

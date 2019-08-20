@@ -51,17 +51,17 @@ test('properly handles status', (): void => {
   }).catch((): void => { });
 });
 
-test('properly handles board updates', (): void => {
+test('properly handles move updates', (): void => {
   let p1 = 'p1';
   let p2 = 'p2';
 
   let mm = new MatchMaker();
-  let testBoard = 'this is a board';
+  let testMoves = [['a'], ['b'], ['c']];
 
   let promises: Promise<any>[] = [];
 
-  expect(mm.updateBoard(p1, testBoard)).toEqual(Status.ERROR);
-  expect(mm.updateBoard(p2, testBoard)).toEqual(Status.ERROR);
+  expect(mm.updateMoves(p1, testMoves)).toEqual(Status.ERROR);
+  expect(mm.updateMoves(p2, testMoves)).toEqual(Status.ERROR);
 
   promises.concat(new Promise((resolve): void => {
     mm.addToQueue(p1).then((): void => {
@@ -79,15 +79,15 @@ test('properly handles board updates', (): void => {
     expect(mm.getStatus(p1)).toEqual([Status.GOOD, undefined]);
     expect(mm.getStatus(p2)).toEqual([Status.GOOD, undefined]);
 
-    expect(mm.updateBoard(p1, testBoard)).toEqual(Status.GOOD);
-    expect(mm.getStatus(p1)).toEqual([Status.GOOD, testBoard]);
-    expect(mm.getStatus(p2)).toEqual([Status.GOOD, testBoard]);
+    expect(mm.updateMoves(p1, testMoves)).toEqual(Status.GOOD);
+    expect(mm.getStatus(p1)).toEqual([Status.GOOD, testMoves]);
+    expect(mm.getStatus(p2)).toEqual([Status.GOOD, testMoves]);
 
-    testBoard = 'this is another board';
+    testMoves = [['c'], ['b'], ['a']];
 
-    expect(mm.updateBoard(p2, testBoard)).toEqual(Status.GOOD);
-    expect(mm.getStatus(p1)).toEqual([Status.GOOD, testBoard]);
-    expect(mm.getStatus(p2)).toEqual([Status.GOOD, testBoard]);
+    expect(mm.updateMoves(p2, testMoves)).toEqual(Status.GOOD);
+    expect(mm.getStatus(p1)).toEqual([Status.GOOD, testMoves]);
+    expect(mm.getStatus(p2)).toEqual([Status.GOOD, testMoves]);
   });
 });
 

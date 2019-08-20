@@ -4,8 +4,8 @@ class GameInstance {
   private _instanceID: string;
   private _p1ID: string;
   private _p2ID: string;
-  private _board: string;
-  private _lastMoves: string[];
+  private _board: string[];
+  private _lastMoves: string[][];
   private _status: Status;
 
   constructor(p1ID: string, p2ID: string) {
@@ -16,8 +16,8 @@ class GameInstance {
     this._status = Status.GOOD;
   }
 
-  public updateBoard(moves: string[]): void {
-    this._board = moves[0];
+  public updateMoves(moves: string[][]): void {
+    this._board = moves[moves.length - 1];
     this._lastMoves = moves;
   }
 
@@ -33,11 +33,11 @@ class GameInstance {
     return this._p2ID;
   }
 
-  get board(): string {
+  get board(): string[] {
     return this._board;
   }
 
-  get lastMoves(): string[] {
+  get moves(): string[][] {
     return this._lastMoves;
   }
 

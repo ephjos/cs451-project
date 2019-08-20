@@ -55,7 +55,7 @@ class MatchMaker {
     return promise;
   }
 
-  public getStatus(playerID: string): [Status, string] {
+  public getStatus(playerID: string): [Status, string[][]] {
     if (this._queue.peek() && this._queue.peek().id === playerID) {
       return [Status.QUEUE, undefined];
     }
@@ -63,19 +63,16 @@ class MatchMaker {
     let gameID = this._players.get(playerID);
     if (gameID) {
       let gameInstance = this._games.get(gameID);
-      return [gameInstance.status, gameInstance.board];
+      return [gameInstance.status, gameInstance.moves];
     }
 
     return [Status.ERROR, undefined];
   }
 
-  public updateBoard(playerID: string, board: string): Status {
+  public updateMoves(playerID: string, moves: string[][]): Status {
     if (this.getStatus(playerID)[0] === Status.GOOD) {
-      let gameInstance = this._games.get(
-        this._players.get(playerID)
-      );
-
-      gameInstance.updateBoard(board);
+      let gameInstance = this._games.get(this._players.get(playerID));
+      gameInstance.updateMoves(moves);
       return gameInstance.status;
     }
     return Status.ERROR;
