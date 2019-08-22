@@ -47,6 +47,7 @@ class Board {
         piece = new Piece(color, i, isKing);
         square.piece = piece;
         this._pieces.push(piece);
+        if(piece.isKing) this._kings.push(piece);
         color === PieceColor.RED ? this._redPieces.push(piece) : this._whitePieces.push(piece);
       }
 
@@ -221,7 +222,7 @@ class Board {
       const captureCoords : Coordinates = [x1 - direction[0], y1 - direction[1]];
       const captureSquare = this._squares[coordinatesToIndex(captureCoords)];
       if(captureSquare.piece === null) {
-        throw new Error('Invalid capture move - no piece on sqaure to capture.');
+        throw new Error('Invalid capture move - no piece on square to capture.');
       }
       
       const capturePiece = captureSquare.piece;
@@ -242,9 +243,9 @@ class Board {
     }
 
     const oldSquare = this._squares[coordinatesToIndex(coordinates!)];
-    const newSqaure = this._squares[coordinatesToIndex(newPosition)];
+    const newSquare = this._squares[coordinatesToIndex(newPosition)];
     oldSquare.piece = null;
-    newSqaure.piece = piece;
+    newSquare.piece = piece;
     piece.coordinates = newPosition;
     if(newPosition[1] === 0) {
       piece.setAsKing();
@@ -296,7 +297,6 @@ class Board {
     else if(color === PieceColor.WHITE) {
       return this._computeAllValidMoves(this._whitePieces);
     }
-
     return;
   }
 
