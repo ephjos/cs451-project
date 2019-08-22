@@ -200,10 +200,10 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
   };
 
   renderReceivedMoves = async (moves: string[][]): Promise<undefined> => {
-    for(const move of moves) {
+    for(let i = 0; i < moves.length; i++) {
       setTimeout(() => {
-        this.setState({ board: new Board(move)});
-      }, 1000);
+        this.setState({ board: new Board(moves[i])});
+      }, (1000 * (i + 1)) - (i + 1));
     }
     return;
   };
