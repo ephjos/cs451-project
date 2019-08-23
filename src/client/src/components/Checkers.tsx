@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import BoardView from './BoardView';
-import { PieceColor, Coordinates, coordinatesToIndex, MoveResponse, EndResponse, DisconnectResponse, Status } from '../classes/Game';
+import { PieceColor, Coordinates, coordinatesToIndex, MoveResponse, 
+   Status, StatusResponse } from '../classes/Game';
 import Board from '../classes/Board';
 import Piece from '../classes/Piece';
 import '../css/Board.css';
@@ -10,7 +11,8 @@ interface CheckersProps {
   hasFirstTurn: boolean;
   onEnd: (endMsg: string) => Promise<undefined>;
   onForfeit: (forfeitMsg: string) => Promise<undefined>;
-  onMove: (moves: string[][]) => Promise<MoveResponse>;
+  onSendMoves: (moves: string[][]) => Promise<StatusResponse>;
+  onReceiveMoves: () => Promise<MoveResponse>;
   onStatus: () => Promise<Status>;
 }
 
@@ -54,8 +56,10 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     } else {
       // wait for moves... but how?
     }
-    
     this.setState({ heartbeat: setInterval(this.props.onStatus, 10000) });
+    window.addEventListener('beforeunload', () => {
+      this.props.onForfeit('You left the game, loser.');
+    });
   };
 
   getPlayerPieces = (): Piece[] => {
@@ -108,12 +112,9 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
 
       // Once a piece becomes king the turn has to end
       if(preserveTurn && !becameKing) {
-        // Here is where we handle if a capture was made
-        // By now the piece should have moved to our selected coords
         const piece = board.squares[coordinatesToIndex(coords)].piece;
         const isValidSelection = piece !== null && piece.color === this.props.player;
-        
-        // But if data update goes wrong then we have to indicate
+
         if(!isValidSelection) {
           console.error("Piece was not updated to position after capture!");
           return;
@@ -141,14 +142,22 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         hasTurn: false,
         computedMoves: false,
       });
-      /**
-       * At this point we disable the UI and send history to the server
-       * then basically wait till we get a response
-       */
-      // Do not forget to precompute moves again upon receiving moves
-      this.props.onMove(turnMoves)
-        .then(async (res) => {
-          await this.handleNewMoves(res);
+
+      this.props.onSendMoves(turnMoves)
+        .then((res) => {
+          const status = res.status;
+          if(status === Status.END) {
+            clearInterval(this.state.heartbeat!);
+            this.props.onEnd(`You lost! But don't give up!`);
+            return;
+          } else if (status === Status.DISCONNECT) {
+            clearInterval(this.state.heartbeat!);
+            this.props.onEnd('Your opponent disconnected!');
+            return;
+          }
+          this.props.onReceiveMoves().then(async (moves: MoveResponse) => {
+            await this.handleNewMoves(moves);
+          });
         })
         .catch(() => {
           clearInterval(this.state.heartbeat!);
@@ -178,7 +187,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       clearInterval(this.state.heartbeat!);
       this.props.onEnd(`You lost! But don't give up!`);
       return;
-    } else if (status === Status.DISCONNECT) {
+    } else if (status === Status.DISCONNECT || status === Status.ERROR) {
       clearInterval(this.state.heartbeat!);
       this.props.onEnd('Your opponent disconnected!');
       return;

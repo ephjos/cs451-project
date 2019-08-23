@@ -47,7 +47,6 @@ export interface ConnectResponse {
 
 export interface StatusResponse {
   status: Status;
-  board: string;
 }
 
 export interface MoveResponse {

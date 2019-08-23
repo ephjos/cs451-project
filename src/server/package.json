@@ -48,7 +48,6 @@
     "eslint-config-google": "^0.13.0",
     "eslint-plugin-react": "^7.14.3",
     "express-session": "^1.16.2",
-    "jest": "^24.8.0",
     "nodemon": "^1.19.1",
     "ts-jest": "^24.0.2",
     "ts-node": "^8.3.0",

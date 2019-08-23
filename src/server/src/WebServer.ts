@@ -4,7 +4,7 @@ import * as session from 'express-session';
 import cors = require('cors');
 import connectMongo = require('connect-mongo');
 const MongoStore = connectMongo(session);
-const TTL = 60000 * 5; // 5 minutes
+const TTL = 60000 * 10; // 10 minutes
 
 import MatchMaker from './MatchMaker';
 import { Status } from '../../client/src/classes/Game';
@@ -30,7 +30,7 @@ class WebServer {
     app.use(express.static('public'));
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
-    app.use(cors({origin: '*'}));
+    app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 
     app.use(session({
       resave: true,
@@ -58,12 +58,11 @@ class WebServer {
 
     app.get('/status', (req: express.Request, res: express.Response): void => {
       console.log(`Received /status request from Client with ID: ${req.session.id}`);
-      let [status, board] = this.mm.getStatus(req.session.id);
+      let [status,] = this.mm.getStatus(req.session.id);
       if (status !== Status.ERROR) {
         res.statusCode = 200;
         res.send({
           status: status,
-          board: board
         });
       } else {
         res.statusCode = 403;
@@ -72,8 +71,8 @@ class WebServer {
     });
 
     // POST
-    app.post('/move', (req: express.Request, res: express.Response): void => {
-      if (req.body && req.body.moves) {
+    app.post('/sendMoves', (req: express.Request, res: express.Response): void => {
+      if (req.session.id && req.body && req.body.moves) {
         let status = this.mm.updateMoves(req.session.id, req.body.moves);
         if (status !== Status.ERROR) {
           res.statusCode = 200;
@@ -85,6 +84,17 @@ class WebServer {
       } else {
         res.statusCode = 400;
         res.send({ msg: 'Request body must be of the form { moves: \'...\' }' });
+      }
+    });
+
+    app.get('/receiveMoves', (req: express.Request, res: express.Response): void => {
+      if(!req.session.id) {
+        res.statusCode = 403;
+        res.send({ msg: 'Client is not currently in game' });
+      } else {
+        this.mm.waitForMoves(req.session.id).then((moves: string[][]): void => {
+          res.send({ moves });
+        });
       }
     });
 

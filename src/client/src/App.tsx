@@ -8,6 +8,8 @@ import { PieceColor, REQUEST_DOMAIN, ConnectResponse,
 import axios from 'axios';
 import to from 'await-to-js';
 
+axios.defaults.withCredentials = true;
+
 interface AppState {
   inGame: boolean;
   firstTurn: boolean;
@@ -52,7 +54,8 @@ class App extends React.Component<{}, AppState> {
           player={player!}
           hasFirstTurn={firstTurn}
           onStatus={this.handleStatus}
-          onMove={this.handleMove}
+          onSendMoves={this.handleSendMoves}
+          onReceiveMoves={this.handleReceiveMoves}
           onEnd={this.handleEnd}
           onForfeit={this.handleForfeit}/>
       );
@@ -99,11 +102,19 @@ class App extends React.Component<{}, AppState> {
     return;
   };
 
-  handleMove = async (moves: string[][]): Promise<MoveResponse> => {
-    const [error, response] = await to(axios.post<MoveResponse>(
-      `${REQUEST_DOMAIN}/move`, {
+  handleSendMoves = async (moves: string[][]): Promise<StatusResponse> => {
+    const [error, response] = await to(axios.post<StatusResponse>(
+      `${REQUEST_DOMAIN}/sendMoves`, {
         moves,
       }));
+    if(error !== null) {
+      throw error;
+    }
+    return response!.data;
+  };
+
+  handleReceiveMoves = async (): Promise<MoveResponse> => {
+    const [error, response] = await to(axios.get<MoveResponse>(`${REQUEST_DOMAIN}/receiveMoves`));
     if(error !== null) {
       throw error;
     }
