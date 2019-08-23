@@ -25,7 +25,7 @@ interface CheckersState {
   hasTurn: boolean;
   hasCaptured: boolean;
   computedMoves: boolean;
-  heartbeat: NodeJS.Timeout | null;
+  heartbeat: number | null;
 }
 
 class Checkers extends React.Component<CheckersProps, CheckersState> {
@@ -54,9 +54,12 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         this.setState({ computedMoves: true });
       });
     } else {
-      // wait for moves... but how?
+      this.props.onReceiveMoves().then(async (moves: MoveResponse) => {
+        await this.handleNewMoves(moves);
+      });
     }
-    this.setState({ heartbeat: setInterval(this.props.onStatus, 10000) });
+    // const heartbeat = window.setInterval(this.props.onStatus, 10000);
+    // this.setState({ heartbeat });
     window.addEventListener('beforeunload', () => {
       this.props.onForfeit('You left the game, loser.');
     });
@@ -147,11 +150,11 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         .then((res) => {
           const status = res.status;
           if(status === Status.END) {
-            clearInterval(this.state.heartbeat!);
+            window.clearInterval(this.state.heartbeat!);
             this.props.onEnd(`You lost! But don't give up!`);
             return;
           } else if (status === Status.DISCONNECT) {
-            clearInterval(this.state.heartbeat!);
+            window.clearInterval(this.state.heartbeat!);
             this.props.onEnd('Your opponent disconnected!');
             return;
           }
@@ -159,8 +162,9 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
             await this.handleNewMoves(moves);
           });
         })
-        .catch(() => {
-          clearInterval(this.state.heartbeat!);
+        .catch((error) => {
+          console.log(error);
+          window.clearInterval(this.state.heartbeat!);
           this.props.onForfeit('You lost connection with the server.');
         });
     }
@@ -175,7 +179,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       } else {
         message = `You lost! But don't give up!`;
       }
-      clearInterval(this.state.heartbeat!);
+      window.clearInterval(this.state.heartbeat!);
       this.props.onEnd(message);
     }
   };
@@ -184,11 +188,11 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     const { status, newMoves } = res;
     
     if(status === Status.END) {
-      clearInterval(this.state.heartbeat!);
+      window.clearInterval(this.state.heartbeat!);
       this.props.onEnd(`You lost! But don't give up!`);
       return;
     } else if (status === Status.DISCONNECT || status === Status.ERROR) {
-      clearInterval(this.state.heartbeat!);
+      window.clearInterval(this.state.heartbeat!);
       this.props.onEnd('Your opponent disconnected!');
       return;
     }
@@ -209,10 +213,19 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
   };
 
   renderReceivedMoves = async (moves: string[][]): Promise<undefined> => {
-    for(let i = 0; i < moves.length; i++) {
-      setTimeout(() => {
-        this.setState({ board: new Board(moves[i])});
-      }, (1000 * (i + 1)) - (i + 1));
+    // have to reverse the board part
+    const reversedMoves: string[][] = [];
+    moves.forEach((move) => {
+      const board = move.slice(0, 64);
+      board.reverse();
+      if(move.length > 64)
+      board.push(...move.slice(64));
+      reversedMoves.push(board);
+    });
+    for(let i = 0; i < reversedMoves.length; i++) {
+      window.setTimeout(() => {
+        this.setState({ board: new Board(reversedMoves[i])});
+      }, (1000 * i) - (i * 10));
     }
     return;
   };

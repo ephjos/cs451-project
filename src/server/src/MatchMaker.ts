@@ -3,7 +3,7 @@ import Queue from './Queue';
 import PlayerPromise from './PlayerPromise';
 import { Status } from '../../client/src/classes/Game';
 
-type MovesPromise = (moves: string[][]) => void;
+type MovesPromise = (response: [Status, string[][]]) => void;
 
 class MatchMaker {
   // TODO: Remove games once they are over
@@ -80,14 +80,13 @@ class MatchMaker {
       // resolve other player's receiveMoves promise
       let opponentId = gameInstance.p2ID === playerID ? gameInstance.p1ID : gameInstance.p2ID;
       let opponentResolve = this._pendingMoves.get(this._players.get(opponentId));
-      console.log(`opponentResolve: ${opponentResolve}`);
-      opponentResolve(moves);
+      opponentResolve([gameInstance.status, moves]);
       return gameInstance.status;
     }
     return Status.ERROR; // Check this value clientside
   }
 
-  public waitForMoves(playerID: string): Promise<string[][]> {
+  public waitForMoves(playerID: string): Promise<[Status, string[][]]> {
     let tempResolve = undefined;
     let promise = new Promise((resolve: MovesPromise): void => {
       tempResolve = resolve;
