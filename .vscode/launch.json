@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Node Inspector",
+      "name": "Debug Server",
       "type": "node",
       "request": "launch",
       "args": ["${workspaceRoot}\\src\\server\\index.ts"],
@@ -20,7 +20,7 @@
     {
       "type": "chrome",
       "request": "launch",
-      "name": "Launch Chrome against localhost",
+      "name": "Debug Client",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}"
     }

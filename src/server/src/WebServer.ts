@@ -4,7 +4,7 @@ import * as session from 'express-session';
 import cors = require('cors');
 import connectMongo = require('connect-mongo');
 const MongoStore = connectMongo(session);
-const TTL = 60000 * 10; // 10 minutes
+const TTL = 60000 * 20; // 10 minutes
 
 import MatchMaker from './MatchMaker';
 import { Status } from '../../client/src/classes/Game';

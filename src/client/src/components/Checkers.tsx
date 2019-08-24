@@ -14,6 +14,8 @@ interface CheckersProps {
   onSendMoves: (moves: string[][]) => Promise<StatusResponse>;
   onReceiveMoves: () => Promise<MoveResponse>;
   onStatus: () => Promise<Status>;
+  onUnload: () => Promise<undefined>;
+  setHeartbeat: (id: number) => void; // Pass interval ID to parent (App.tsx) so when status fails we can clear it
 }
 
 interface CheckersState {
@@ -58,11 +60,10 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         await this.handleNewMoves(moves);
       });
     }
-    // const heartbeat = window.setInterval(this.props.onStatus, 10000);
-    // this.setState({ heartbeat });
-    window.addEventListener('beforeunload', () => {
-      this.props.onForfeit('You left the game, loser.');
-    });
+    const heartbeat = window.setInterval(this.props.onStatus, 10000);
+    this.props.setHeartbeat(heartbeat);
+    this.setState({ heartbeat });
+    window.addEventListener('beforeunload', this.props.onUnload);
   };
 
   getPlayerPieces = (): Piece[] => {
@@ -151,7 +152,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
           const status = res.status;
           if(status === Status.END) {
             window.clearInterval(this.state.heartbeat!);
-            this.props.onEnd(`You lost! But don't give up!`);
+            this.props.onEnd(`You won the game! congratulations!`);
             return;
           } else if (status === Status.DISCONNECT) {
             window.clearInterval(this.state.heartbeat!);
@@ -222,12 +223,18 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       board.push(...move.slice(64));
       reversedMoves.push(board);
     });
-    for(let i = 0; i < reversedMoves.length; i++) {
-      window.setTimeout(() => {
-        this.setState({ board: new Board(reversedMoves[i])});
-      }, (1000 * i) - (i * 10));
-    }
-    return;
+    let promise: Promise<undefined> = new Promise((resolve): void => {
+      for(let i = 0; i < reversedMoves.length; i++) {
+        window.setTimeout(() => {
+          this.setState({ board: new Board(reversedMoves[i])});
+          if(i === reversedMoves.length - 1) {
+            resolve(undefined);
+          }
+        }, (1000 * i) - (i * 10));
+      }
+    });
+    
+    return promise;
   };
 
   getInitialPositions = (): string[] => {

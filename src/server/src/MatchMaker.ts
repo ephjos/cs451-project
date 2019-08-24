@@ -78,8 +78,7 @@ class MatchMaker {
       let gameInstance = this._games.get(this._players.get(playerID));
       gameInstance.updateMoves(moves);
       // resolve other player's receiveMoves promise
-      let opponentId = gameInstance.p2ID === playerID ? gameInstance.p1ID : gameInstance.p2ID;
-      let opponentResolve = this._pendingMoves.get(this._players.get(opponentId));
+      let opponentResolve = this._pendingMoves.get(this._players.get(playerID));
       opponentResolve([gameInstance.status, moves]);
       return gameInstance.status;
     }

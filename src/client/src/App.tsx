@@ -15,6 +15,7 @@ interface AppState {
   firstTurn: boolean;
   player: PieceColor | null;
   disableFind: boolean;
+  heartbeat: number;
 }
 
 class App extends React.Component<{}, AppState> {
@@ -26,6 +27,7 @@ class App extends React.Component<{}, AppState> {
       firstTurn: false,
       player: null,
       disableFind: false,
+      heartbeat: 0,
     };
   }
 
@@ -36,6 +38,8 @@ class App extends React.Component<{}, AppState> {
       player: null,
       disableFind: false,
     });
+    window.clearInterval(this.state.heartbeat);
+    window.removeEventListener('beforeunload', this.handleUnload);
   };
 
   renderPage = (): JSX.Element => {
@@ -56,10 +60,24 @@ class App extends React.Component<{}, AppState> {
           onStatus={this.handleStatus}
           onSendMoves={this.handleSendMoves}
           onReceiveMoves={this.handleReceiveMoves}
+          setHeartbeat={this.setHeartbeat}
           onEnd={this.handleEnd}
-          onForfeit={this.handleForfeit}/>
+          onForfeit={this.handleForfeit}
+          onUnload={this.handleUnload}/>
       );
     }
+  };
+  
+  setHeartbeat = (id: number): void => {
+    this.setState({ heartbeat: id });
+  }
+
+  handleUnload = async (): Promise<undefined> => {
+    if(this.state.inGame) {
+      await this.handleForfeit('You left the game');
+      window.removeEventListener('beforeunload', this.handleUnload);
+    }
+    return;
   };
 
   handleConnect = (): void => {
@@ -86,9 +104,10 @@ class App extends React.Component<{}, AppState> {
     const [error, response] = await to(axios.get<EndResponse>(`${REQUEST_DOMAIN}/end`));
     console.log(response);
     if(error !== null) {
-      throw error;
+      console.log('Called end after game ended.'); // this is the most likely scenario
     }
     window.alert(endMsg);
+    window.clearInterval(this.state.heartbeat);
     this.resetState();
     return;
   };
@@ -140,8 +159,8 @@ class App extends React.Component<{}, AppState> {
       window.alert('Your opponent lost connection to the game.');
       this.resetState();
     } else if(status === Status.END) {
-      this.handleEnd(`You lost! But don't give up!`);
-    } else if((status === Status.QUEUE && this.state.inGame) || Status.ERROR) { // This should never happen!!
+      this.handleEnd(`You won the game! Congratulations!`);
+    } else if((status === Status.QUEUE && this.state.inGame) || status === Status.ERROR) {
       window.alert('There was an unexpected error with your game. Sorry!');
       this.resetState();
     }
