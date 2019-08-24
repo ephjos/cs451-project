@@ -88,12 +88,31 @@ const  boardWithLessThan64Values= `-/r/-/r/-/r/-/r/
                                    -/-/-/-/-/-/-/w/
                                    -/-/-/w/-/w/-`.replace(/(\n|\t|\s)/g, '').split('/');
 
+const edgeCasePositions = `r*/r*/w*/-/r/-/-/-/-/-/r/
+                           r/-/r/-/-/-/w/-/
+                           -/r/-/w/-/-/-/r/
+                           -/-/-/-/-/-/-/-/
+                           -/-/-/-/-/-/-/-/
+                           -/-/-/-/-/-/-/-/
+                           -/-/-/-/-/-/-/w/
+                           w/-/w/-/w/-/w/-`.replace(/(\n|\t|\s)/g, '').split('/');
+
+
 const captureBoard = new Board(capturePositions.reverse());
 const staticBoard = new Board(originalPositions.reverse());
 const originalBoard = new Board(originalPositions.reverse());
 const kingMoveBoard = new Board(kingMovePositions.reverse());
 const kingCaptureBoard = new Board(kingCapturePositions.reverse());
 const SingleRedCaptureBoard = new Board(SingleRedCapturePositions.reverse());
+const edgeCaseBoard = new Board(edgeCasePositions.reverse());
+
+
+test('computeAllValidMoves EdgeCase', async () => {
+    await edgeCaseBoard.computeAllValidMoves(PieceColor.RED);
+    // @ts-ignore
+    const data = edgeCaseBoard._validMovesCache;
+    expect(data.size).toBe('6');
+});
 
 test('serializeToArray', () => {
     expect(staticBoard.serializeToArray()).toEqual(originalPositions.reverse());
