@@ -23,6 +23,30 @@
       "name": "Debug Client",
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}"
-    }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Jest Tests",
+      "cwd": "${workspaceFolder}/src/client",
+      "args": [
+        "--inspect-brk",
+        "${workspaceRoot}/src/client/node_modules/.bin/jest",
+        "--runInBand",
+        "--config",
+        "${workspaceRoot}/src/client/jest.config.js"
+      ],
+      "windows": {
+        "args": [
+          "--inspect-brk",
+          "${workspaceRoot}/src/client/node_modules/jest/bin/jest.js",
+          "--runInBand",
+          "--config",
+          "${workspaceRoot}/src/client/jest.config.js"          
+        ],
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
   ]
 }

@@ -12,6 +12,7 @@ class Board {
   private _capturedReds: Piece[];
   private _capturedWhites: Piece[];
   private _validMovesCache: Map<Piece, Coordinates[]>;
+  private _computedMoves: boolean;
 
   constructor(initialValues: string[]) {
     if(initialValues.length < 64) {
@@ -32,6 +33,7 @@ class Board {
     this._capturedReds = [];
     this._capturedWhites = [];
     this._validMovesCache = new Map<Piece, Coordinates[]>();
+    this._computedMoves = false;
 
     const activeValues = initialValues.slice(0, 64);
     activeValues.forEach((val, i) => {
@@ -151,7 +153,7 @@ class Board {
 
   private _getValidMoves(piece: Piece, hasCaptured: boolean) : Coordinates[] {
     // We only use the cache if it is not a chained move
-    if(this._validMovesCache.has(piece) && !hasCaptured) {
+    if(this._computedMoves && !hasCaptured) {
       return this._validMovesCache.get(piece) || []; // I blame flow analysis in maps for this one <.<
     }
 
@@ -273,8 +275,8 @@ class Board {
       const captures = this._getValidMoves(piece, true);
       if(captures.length > 0) {
         captureFound = true;
-        this._validMovesCache.set(piece, captures);
       }
+      this._validMovesCache.set(piece, captures);
     });
 
     // Second pass - we found none so we just fill in valid moves
@@ -287,6 +289,7 @@ class Board {
       });
     }
 
+    this._computedMoves = true;
     return;
   }
 

@@ -111,7 +111,7 @@ test('computeAllValidMoves EdgeCase', async () => {
     await edgeCaseBoard.computeAllValidMoves(PieceColor.RED);
     // @ts-ignore
     const data = edgeCaseBoard._validMovesCache;
-    expect(data.size).toBe('6');
+    expect(data.size).toBe(6);
 });
 
 test('serializeToArray', () => {
