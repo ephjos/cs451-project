@@ -143,7 +143,6 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         highlighted: [], 
         board,
         history,
-        hasTurn: false,
         computedMoves: false,
       });
 
@@ -159,6 +158,9 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
             this.props.onEnd('Your opponent disconnected!');
             return;
           }
+
+          this.checkAndHandleWinner();
+          this.setState({ hasTurn: false });
           this.props.onReceiveMoves().then(async (moves: MoveResponse) => {
             await this.handleNewMoves(moves);
           });
@@ -199,12 +201,12 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     }
     const history = [...this.state.history];
     history.push(...newMoves);
+    this.setState({ hasTurn: true });
     await this.renderReceivedMoves(newMoves);
     this.checkAndHandleWinner();
     this.setState({
       turnMoves: [],
       history,
-      hasTurn: true,
     }, () => {
       this.state.board.computeAllValidMoves(this.props.player).then(() => {
         this.setState({ computedMoves: true });
@@ -230,7 +232,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
           if(i === reversedMoves.length - 1) {
             resolve(undefined);
           }
-        }, (1000 * i) - (i * 10));
+        }, (1000 * (i + 1)) - ((i + 1) * 10));
       }
     });
     
