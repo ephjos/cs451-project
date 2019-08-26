@@ -1,9 +1,10 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import * as session from 'express-session';
+import cors = require('cors');
 import connectMongo = require('connect-mongo');
 const MongoStore = connectMongo(session);
-const TTL = 60000 * 5; // 5 minutes
+const TTL = 60000 * 20; // 10 minutes
 
 import MatchMaker from './MatchMaker';
 import { Status } from '../../client/src/classes/Game';
@@ -29,6 +30,7 @@ class WebServer {
     app.use(express.static('public'));
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
+    app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 
     app.use(session({
       resave: true,
@@ -46,30 +48,34 @@ class WebServer {
   private _configureEndpoints(app: express.Application): express.Application {
     // GET
     app.get('/connect', (req: express.Request, res: express.Response): void => {
+      console.log(`Received /connect request from Client with ID: ${req.session.id}`);
       this.mm.addToQueue(req.session.id).then((currentTurn?: boolean): void => {
         res.statusCode = 200;
         res.send({ msg: 'Opponent found!', currentTurn });
+        console.log(`Found game for Client with ID: ${req.session.id}`);
       });
     });
 
     app.get('/status', (req: express.Request, res: express.Response): void => {
-      let [status, board] = this.mm.getStatus(req.session.id);
+      console.log(`Received /status request from Client with ID: ${req.session.id}`);
+      let [status,] = this.mm.getStatus(req.session.id);
       if (status !== Status.ERROR) {
         res.statusCode = 200;
         res.send({
           status: status,
-          board: board
         });
       } else {
+        console.log(`Bad status request from ${req.session.id}, status: ${status}`);
         res.statusCode = 403;
         res.send({ msg: 'Client is not currently in a game or queue' });
       }
     });
 
     // POST
-    app.post('/move', (req: express.Request, res: express.Response): void => {
-      if (req.body && req.body.board) {
-        let status = this.mm.updateBoard(req.session.id, req.body.board);
+    app.post('/sendMoves', (req: express.Request, res: express.Response): void => {
+      if (req.session.id && req.body && req.body.moves) {
+        console.log(`Received /sendMoves request from Client with ID: ${req.session.id}`);
+        let status = this.mm.updateMoves(req.session.id, req.body.moves);
         if (status !== Status.ERROR) {
           res.statusCode = 200;
           res.send({ status });
@@ -79,13 +85,25 @@ class WebServer {
         }
       } else {
         res.statusCode = 400;
-        res.send({ msg: 'Request body must be of the form { board: \'...\' }' });
+        res.send({ msg: 'Request body must be of the form { moves: \'...\' }' });
       }
     });
 
-    app.post('/end', (req: express.Request, res: express.Response): void => {
-      let status = this.mm.endGame(req.session.id);
+    app.get('/receiveMoves', (req: express.Request, res: express.Response): void => {
+      if(!req.session.id) {
+        res.statusCode = 403;
+        res.send({ msg: 'Client is not currently in game' });
+      } else {
+        console.log(`Received /receiveMoves request from Client with ID: ${req.session.id}`);
+        this.mm.waitForMoves(req.session.id).then((response: [Status, string[][]]): void => {
+          res.send({ status: response[0], newMoves: response[1] });
+        });
+      }
+    });
 
+    app.get('/end', (req: express.Request, res: express.Response): void => {
+      console.log(`Received /end request from Client with ID: ${req.session.id}`);
+      let status = this.mm.endGame(req.session.id);
       if (status !== Status.ERROR) {
         res.statusCode = 200;
         res.send({ status: status });
@@ -95,7 +113,8 @@ class WebServer {
       }
     });
 
-    app.post('/disconnect', (req: express.Request, res: express.Response): void => {
+    app.get('/disconnect', (req: express.Request, res: express.Response): void => {
+      console.log(`Received /disconnect request from Client with ID: ${req.session.id}`);
       let status = this.mm.forfeit(req.session.id);
 
       if (status !== Status.ERROR) {

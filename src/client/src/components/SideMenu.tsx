@@ -2,12 +2,12 @@ import React from 'react';
 import '../css/SideMenu.css';
 
 export interface MenuProps {
-  topChildren: JSX.Element[],
-  midChildren: JSX.Element[],
-  bottomChildren: JSX.Element[],
+  topChildren: JSX.Element[];
+  midChildren: JSX.Element[];
+  bottomChildren: JSX.Element[];
 }
 
-const SideMenu : React.FC<MenuProps> = (props) => {
+const SideMenu: React.FC<MenuProps> = (props) => {
   return (
     <div className="menu">
       <div className="menu-top">
@@ -21,6 +21,6 @@ const SideMenu : React.FC<MenuProps> = (props) => {
       </div>
     </div>
   );
-}
+};
 
 export default SideMenu;

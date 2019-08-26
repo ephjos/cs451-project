@@ -3,16 +3,20 @@ import Queue from './Queue';
 import PlayerPromise from './PlayerPromise';
 import { Status } from '../../client/src/classes/Game';
 
+type MovesPromise = (response: [Status, string[][]]) => void;
+
 class MatchMaker {
   // TODO: Remove games once they are over
   private _queue: Queue<PlayerPromise>;
   private _games: Map<string, GameInstance>;
   private _players: Map<string, string>;
+  private _pendingMoves: Map<string, MovesPromise>;
 
   constructor() {
     this._queue = new Queue();
     this._games = new Map();
     this._players = new Map();
+    this._pendingMoves = new Map();
   }
 
   private _createGame(): void {
@@ -55,7 +59,7 @@ class MatchMaker {
     return promise;
   }
 
-  public getStatus(playerID: string): [Status, string] {
+  public getStatus(playerID: string): [Status, string[][]] {
     if (this._queue.peek() && this._queue.peek().id === playerID) {
       return [Status.QUEUE, undefined];
     }
@@ -63,22 +67,32 @@ class MatchMaker {
     let gameID = this._players.get(playerID);
     if (gameID) {
       let gameInstance = this._games.get(gameID);
-      return [gameInstance.status, gameInstance.board];
+      return [gameInstance.status, gameInstance.moves];
     }
 
     return [Status.ERROR, undefined];
   }
 
-  public updateBoard(playerID: string, board: string): Status {
+  public updateMoves(playerID: string, moves: string[][]): Status {
     if (this.getStatus(playerID)[0] === Status.GOOD) {
-      let gameInstance = this._games.get(
-        this._players.get(playerID)
-      );
-
-      gameInstance.updateBoard(board);
+      let gameInstance = this._games.get(this._players.get(playerID));
+      gameInstance.updateMoves(moves);
+      // resolve other player's receiveMoves promise
+      let opponentResolve = this._pendingMoves.get(this._players.get(playerID));
+      opponentResolve([gameInstance.status, moves]);
       return gameInstance.status;
     }
-    return Status.ERROR;
+    return Status.ERROR; // Check this value clientside
+  }
+
+  public waitForMoves(playerID: string): Promise<[Status, string[][]]> {
+    let tempResolve = undefined;
+    let promise = new Promise((resolve: MovesPromise): void => {
+      tempResolve = resolve;
+    });
+
+    this._pendingMoves.set(this._players.get(playerID), tempResolve);
+    return promise;
   }
 
   public forfeit(playerID: string): Status {

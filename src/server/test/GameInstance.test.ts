@@ -34,9 +34,10 @@ test('can update board', (): void => {
   let p1 = 'p1';
   let p2 = 'p2';
   let gi = new GameInstance(p1, p2);
-  let testBoard = 'This is a board';
-  gi.updateBoard(testBoard);
-  expect(gi.board).toEqual(testBoard);
+  let testMoves = [['a'], ['b'], ['c']];
+  gi.updateMoves(testMoves);
+  expect(gi.moves).toEqual(testMoves);
+  expect(gi.board).toEqual(testMoves[testMoves.length - 1]);
 });
 
 test('can set the status', (): void => {
