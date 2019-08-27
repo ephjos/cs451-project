@@ -26,4 +26,7 @@ To play on the same machine:
 2. Open another incognito Chrome window and visit `localhost:5000`
 3. Both enter the queue and play
 
+**For bash users**
 
+Steps 5 and 6 may be skipped and the
+`build.sh` script may be ran after step 8 instead.
