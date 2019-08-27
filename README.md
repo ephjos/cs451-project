@@ -30,3 +30,12 @@ To play on the same machine:
 
 Steps 5 and 6 may be skipped and the
 `build.sh` script may be ran after step 8 instead.
+
+# Testing
+
+Explained in the testing doc
+
+# Static Analysis
+
+Used `eslint` with the configuration file found at `src/.eslintrc.json`.
+
