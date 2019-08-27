@@ -143,6 +143,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         highlighted: [], 
         board,
         history,
+        hasCaptured: false,
         computedMoves: false,
       });
 
