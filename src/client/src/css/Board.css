@@ -9,8 +9,10 @@
 
 .board {
   position: relative;
-  width: 45%;
-  height: 45%;
+  width: 25%;
+  height: 25%;
+  min-width:300px;
+  min-height:300px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -23,8 +25,9 @@
   position: relative;
   /* padding-top: 1rem; */
   color: black;
-  margin-left: 2rem;
+  margin-left: 3rem;
   width: 7%;
+  min-width: 100px;
   height: 100%;
   background-color: darkgray;
   display: flex;
@@ -45,7 +48,7 @@
 }
 
 .captured-count {
-  margin: 3rem 0;
+  margin: 4rem 0 2rem 0;
 }
 
 .board-overlay {
