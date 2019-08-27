@@ -37,7 +37,9 @@
     "@typescript-eslint/no-parameter-properties": [
       "error",
       {
-        "allows": ["readonly"]
+        "allows": [
+          "readonly"
+        ]
       }
     ],
     "@typescript-eslint/indent": [
@@ -48,6 +50,8 @@
       }
     ],
     "semi": "off",
-    "@typescript-eslint/semi": ["error"]
+    "@typescript-eslint/semi": [
+      "error"
+    ]
   }
 }
