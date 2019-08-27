@@ -6,14 +6,14 @@ import * as serviceWorker from './serviceWorker';
 
 // Disable React Dev Tools in Prod builds
 const disableReactDevTools = (): void => {
-  if(process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "production") {
     const noop = (): void => undefined;
     const DEV_TOOLS = (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__;
-  
+
     if (typeof DEV_TOOLS === 'object') {
-        for (const [key, value] of Object.entries(DEV_TOOLS)) {
-            DEV_TOOLS[key] = typeof value === 'function' ? noop : null;
-        }
+      for (const [key, value] of Object.entries(DEV_TOOLS)) {
+        DEV_TOOLS[key] = typeof value === 'function' ? noop : null;
+      }
     }
   }
 };

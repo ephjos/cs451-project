@@ -36,15 +36,15 @@ const BoardView: React.FC<BoardProps> = (props) => {
   };
 
   const renderPiece = (piece: Piece): JSX.Element => {
-    return <PieceView key={generateV4UUID()} piece={piece}/>;
+    return <PieceView key={generateV4UUID()} piece={piece} />;
   };
-  
+
   const renderSquare = (square: Square): JSX.Element => {
     const [x, y] = square.coordinates;
     const selected = props.selected !== null && props.selected[0] === x && props.selected[1] === y;
     const highlighted = props.highlighted.some(([xPos, yPos]) => x === xPos && y === yPos);
     return (
-      <SquareView 
+      <SquareView
         key={square.coordinates.toString()}
         square={square}
         clickHandler={(): void => props.onSquareClick(square.coordinates)}
@@ -65,10 +65,10 @@ const BoardView: React.FC<BoardProps> = (props) => {
     <React.Fragment>
       <div className="board">
         {renderSquares()}
-        {!props.hasTurn && 
-        <div className="board-overlay">
-          <p className="board-overlay-text">Waiting for Opponent...</p>
-        </div>}
+        {!props.hasTurn &&
+          <div className="board-overlay">
+            <p className="board-overlay-text">Waiting for Opponent...</p>
+          </div>}
       </div>
       <div className="board-captured">
         {renderCaptured()}

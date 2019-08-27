@@ -1,7 +1,9 @@
 import React, { ReactNode } from 'react';
 import BoardView from './BoardView';
-import { PieceColor, Coordinates, coordinatesToIndex, MoveResponse, 
-   Status, StatusResponse } from '../classes/Game';
+import {
+  PieceColor, Coordinates, coordinatesToIndex, MoveResponse,
+  Status, StatusResponse
+} from '../classes/Game';
 import Board from '../classes/Board';
 import Piece from '../classes/Piece';
 import '../css/Board.css';
@@ -51,7 +53,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
   }
 
   componentDidMount = (): void => {
-    if(this.state.hasTurn) {
+    if (this.state.hasTurn) {
       this.state.board.computeAllValidMoves(this.props.player).then(() => {
         this.setState({ computedMoves: true });
       });
@@ -60,7 +62,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         await this.handleNewMoves(moves);
       });
     }
-    const heartbeat = window.setInterval(this.props.onStatus, 10000);
+    const heartbeat = window.setInterval(this.props.onStatus, 2000);
     this.props.setHeartbeat(heartbeat);
     this.setState({ heartbeat });
     window.addEventListener('beforeunload', this.props.onUnload);
@@ -68,27 +70,27 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
 
   getPlayerPieces = (): Piece[] => {
     switch (this.props.player) {
-    case PieceColor.RED: return this.state.board.redPieces;
-    case PieceColor.WHITE: return this.state.board.whitePieces;
+      case PieceColor.RED: return this.state.board.redPieces;
+      case PieceColor.WHITE: return this.state.board.whitePieces;
     }
   };
 
   handleSquareClick = (coords: Coordinates): void => {
-    if(!this.state.hasTurn) {
+    if (!this.state.hasTurn) {
       return;
     }
 
     // Should be rare but means board is still computing moves so board has to be unresponsive
-    if(!this.state.computedMoves) {
+    if (!this.state.computedMoves) {
       return;
     }
 
     const { board, selected, highlighted } = this.state;
-    if(selected === null) {
+    if (selected === null) {
       const piece = board.squares[coordinatesToIndex(coords)].piece;
       const isValidSelection = piece !== null && piece.color === this.props.player;
-      
-      if(!isValidSelection) {
+
+      if (!isValidSelection) {
         return;
       }
 
@@ -97,7 +99,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       this.setState({ selected: coords, highlighted: newHighlighted });
       return;
     } else {
-      if(selected[0] === coords[0] && selected[1] === coords[1] && !this.state.hasCaptured) {
+      if (selected[0] === coords[0] && selected[1] === coords[1] && !this.state.hasCaptured) {
         this.setState({ selected: null, highlighted: [] });
         return;
       }
@@ -105,7 +107,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
         return x === coords[0] && y === coords[1];
       });
 
-      if(!isValidMove){
+      if (!isValidMove) {
         return;
       }
       const wasKing = board.squares[coordinatesToIndex(selected)].piece!.isKing;
@@ -115,18 +117,19 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       turnMoves.push(board.serializeToArray());
 
       // Once a piece becomes king the turn has to end
-      if(preserveTurn && !becameKing) {
+      if (preserveTurn && !becameKing) {
         const piece = board.squares[coordinatesToIndex(coords)].piece;
         const isValidSelection = piece !== null && piece.color === this.props.player;
 
-        if(!isValidSelection) {
+        if (!isValidSelection) {
           console.error("Piece was not updated to position after capture!");
           return;
         }
 
         const validMoves = board.getValidMoves(coords, true);
-        if(validMoves.length !== 0) {
-          this.setState({ selected: coords,
+        if (validMoves.length !== 0) {
+          this.setState({
+            selected: coords,
             highlighted: validMoves,
             hasCaptured: true,
             turnMoves,
@@ -139,8 +142,8 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       history.push(...turnMoves);
 
       this.setState({
-        selected: null, 
-        highlighted: [], 
+        selected: null,
+        highlighted: [],
         board,
         history,
         hasCaptured: false,
@@ -150,7 +153,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
       this.props.onSendMoves(turnMoves)
         .then((res) => {
           const status = res.status;
-          if(status === Status.END) {
+          if (status === Status.END) {
             window.clearInterval(this.state.heartbeat!);
             this.props.onEnd(`You won the game! congratulations!`);
             return;
@@ -177,8 +180,8 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
   checkAndHandleWinner = (): void => {
     const winner = this.state.board.getGameWinner();
     let message;
-    if(winner) {
-      if(winner === this.props.player) {
+    if (winner) {
+      if (winner === this.props.player) {
         message = 'Congratulations! You won!';
       } else {
         message = `You lost! But don't give up!`;
@@ -190,8 +193,8 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
 
   handleNewMoves = async (res: MoveResponse): Promise<undefined> => {
     const { status, newMoves } = res;
-    
-    if(status === Status.END) {
+
+    if (status === Status.END) {
       window.clearInterval(this.state.heartbeat!);
       this.props.onEnd(`You lost! But don't give up!`);
       return;
@@ -222,21 +225,21 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
     moves.forEach((move) => {
       const board = move.slice(0, 64);
       board.reverse();
-      if(move.length > 64)
-      board.push(...move.slice(64));
+      if (move.length > 64)
+        board.push(...move.slice(64));
       reversedMoves.push(board);
     });
     let promise: Promise<undefined> = new Promise((resolve): void => {
-      for(let i = 0; i < reversedMoves.length; i++) {
+      for (let i = 0; i < reversedMoves.length; i++) {
         window.setTimeout(() => {
-          this.setState({ board: new Board(reversedMoves[i])});
-          if(i === reversedMoves.length - 1) {
+          this.setState({ board: new Board(reversedMoves[i]) });
+          if (i === reversedMoves.length - 1) {
             resolve(undefined);
           }
         }, (1000 * (i + 1)) - ((i + 1) * 10));
       }
     });
-    
+
     return promise;
   };
 
@@ -250,7 +253,7 @@ class Checkers extends React.Component<CheckersProps, CheckersState> {
                                -w-w-w-w
                                w-w-w-w-`.replace(/(\n|\t|\s)/g, '').split('');
 
-    if(this.props.player === PieceColor.RED) {
+    if (this.props.player === PieceColor.RED) {
       intitialPositions.reverse();
     }
     return intitialPositions;
