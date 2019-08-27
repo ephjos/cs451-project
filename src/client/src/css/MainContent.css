@@ -2,9 +2,16 @@
   display: flex;
   flex-direction: column;
   flex-wrap: wrap;
-  /* align-items: center; */
-  justify-content: flex-start;
-  width: 70%;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
   color: white;
   background-color: #3a3a3a;
+}
+
+.main-content > button {
+  margin-top: 100px;
+  width: 200px;
+  height: 75px;
+  border-radius: 10px;
 }

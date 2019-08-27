@@ -3,8 +3,10 @@ import './css/App.css';
 import SideMenu from './components/SideMenu';
 import MainContent from './components/MainContent';
 import Checkers from './components/Checkers';
-import { PieceColor, REQUEST_DOMAIN, ConnectResponse,
-  DisconnectResponse, EndResponse, MoveResponse, StatusResponse, Status } from './classes/Game';
+import {
+  PieceColor, REQUEST_DOMAIN, ConnectResponse,
+  DisconnectResponse, EndResponse, MoveResponse, StatusResponse, Status
+} from './classes/Game';
 import axios from 'axios';
 import to from 'await-to-js';
 
@@ -44,17 +46,17 @@ class App extends React.Component<{}, AppState> {
 
   renderPage = (): JSX.Element => {
     const { inGame, disableFind, player, firstTurn } = this.state;
-    if(!inGame) {
+    if (!inGame) {
       return (
-        <button 
+        <button
           disabled={disableFind}
           onClick={this.handleConnect}>
-          {disableFind ? 'Searching...': 'Find a game'}
+          {disableFind ? 'Searching...' : 'Find a game'}
         </button>
       );
     } else {
       return (
-        <Checkers 
+        <Checkers
           player={player!}
           hasFirstTurn={firstTurn}
           onStatus={this.handleStatus}
@@ -63,17 +65,17 @@ class App extends React.Component<{}, AppState> {
           setHeartbeat={this.setHeartbeat}
           onEnd={this.handleEnd}
           onForfeit={this.handleForfeit}
-          onUnload={this.handleUnload}/>
+          onUnload={this.handleUnload} />
       );
     }
   };
-  
+
   setHeartbeat = (id: number): void => {
     this.setState({ heartbeat: id });
   }
 
   handleUnload = async (): Promise<undefined> => {
-    if(this.state.inGame) {
+    if (this.state.inGame) {
       await this.handleForfeit('You left the game');
       window.removeEventListener('beforeunload', this.handleUnload);
     }
@@ -103,7 +105,7 @@ class App extends React.Component<{}, AppState> {
   handleEnd = async (endMsg: string): Promise<undefined> => {
     const [error, response] = await to(axios.get<EndResponse>(`${REQUEST_DOMAIN}/end`));
     console.log(response);
-    if(error !== null) {
+    if (error !== null) {
       console.log('Called end after game ended.'); // this is the most likely scenario
     }
     window.alert(endMsg);
@@ -126,7 +128,7 @@ class App extends React.Component<{}, AppState> {
       `${REQUEST_DOMAIN}/sendMoves`, {
         moves,
       }));
-    if(error !== null) {
+    if (error !== null) {
       throw error;
     }
     return response!.data;
@@ -134,7 +136,7 @@ class App extends React.Component<{}, AppState> {
 
   handleReceiveMoves = async (): Promise<MoveResponse> => {
     const [error, response] = await to(axios.get<MoveResponse>(`${REQUEST_DOMAIN}/receiveMoves`));
-    if(error !== null) {
+    if (error !== null) {
       throw error;
     }
     return response!.data;
@@ -143,10 +145,10 @@ class App extends React.Component<{}, AppState> {
   handleStatus = async (): Promise<Status> => {
     const [error, response] = await to(axios.get<StatusResponse>(`${REQUEST_DOMAIN}/status`));
     console.log(response);
-    if(error !== null) {
+    if (error !== null) {
       throw error;
     }
-    if(response === undefined) {
+    if (response === undefined) {
       window.alert('Lost connection to the game.');
       this.resetState();
       return Status.ERROR;
@@ -155,18 +157,18 @@ class App extends React.Component<{}, AppState> {
     if (status === Status.FORFEIT) {
       window.alert('Your opponent forfeited. You won!');
       this.resetState();
-    } else if(status === Status.DISCONNECT) {
+    } else if (status === Status.DISCONNECT) {
       window.alert('Your opponent lost connection to the game.');
       this.resetState();
-    } else if(status === Status.END) {
+    } else if (status === Status.END) {
       this.handleEnd(`You won the game! Congratulations!`);
-    } else if((status === Status.QUEUE && this.state.inGame) || status === Status.ERROR) {
+    } else if ((status === Status.QUEUE && this.state.inGame) || status === Status.ERROR) {
       window.alert('There was an unexpected error with your game. Sorry!');
       this.resetState();
     }
-    return status; 
+    return status;
   };
-  
+
   render = (): ReactNode => {
     return (
       <React.Fragment>
@@ -174,13 +176,20 @@ class App extends React.Component<{}, AppState> {
           <h1 className="title">CS451 Checkers</h1>
           {this.renderPage()}
         </MainContent>
-        <SideMenu 
-          topChildren={[
-            <div key="topChildren"/>]} 
-          midChildren={[
-            <div key="midChildren"/>]} 
-          bottomChildren={[
-            <div key="bottomChildren"/>]}/>
+        {this.state.inGame ?
+          <SideMenu
+            topChildren={[
+              <div key="topChildren" />]}
+            midChildren={[
+              <div key="midChildren">
+                <button onClick={() => { this.handleForfeit('You forfeited!') }}
+                  className="forfeit-button">
+                  Forfeit
+                </button>
+              </div>]}
+            bottomChildren={[
+              <div key="bottomChildren" />]} />
+          : ''}
       </React.Fragment>
     );
   };

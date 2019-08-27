@@ -33,3 +33,12 @@
 .title {
   text-align: center;
 }
+
+.forfeit-button {
+  width: 125px;
+  height: 50px;
+  background: #ff0000;
+  border: 1px solid#ff0000;
+  color: #ffffff;
+  margin: 0 0 20px 0;
+}
