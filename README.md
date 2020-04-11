@@ -1,6 +1,26 @@
 # cs451-team-1
 Repository for 201845, Section 1, Group 1
 
+<br>
+
+<p align="center">
+  <img src="./screenshots/start1.png" />
+</p>
+<p align="center">
+  <img src="./screenshots/start2.png" />
+</p>
+<p align="center">
+  <img src="./screenshots/basic.gif" />
+</p>
+<p align="center">
+  <img src="./screenshots/king.gif" />
+</p>
+<p align="center">
+  <img src="./screenshots/win.gif" />
+</p>
+
+<br>
+
 # Install
 
 1. [Install npm](https://www.npmjs.com/get-npm)
